@@ -1,0 +1,7 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1672962647" />
+    <testcase name="adder_basic_test" classname="test_adder" file="/mnt/c/Users/lucas/OneDrive/Desktop/CubeSat/repos/cores/rtl/examples/adder/test_adder.py" lineno="12" time="0.0005140304565429688" sim_time_ns="2.000001" ratio_time="3890.8219825157703" />
+    <testcase name="adder_randomised_test" classname="test_adder" file="/mnt/c/Users/lucas/OneDrive/Desktop/CubeSat/repos/cores/rtl/examples/adder/test_adder.py" lineno="29" time="0.0011835098266601562" sim_time_ns="20.000000999999997" ratio_time="16898.888838497984" />
+  </testsuite>
+</testsuites>

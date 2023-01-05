@@ -1,0 +1,4 @@
+v 4
+file "/mnt/c/Users/lucas/OneDrive/Desktop/CubeSat/repos/cores/rtl/examples/adder/" "adder.vhdl" "b9e4ed8f3ec5389b7b505f03b876e7a64bffb816" "20230105235047.038":
+  entity adder at 4( 126) + 0 on 11;
+  architecture rtl of adder at 17( 429) + 0 on 12;
