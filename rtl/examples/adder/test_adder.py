@@ -13,17 +13,13 @@ from cocotb.triggers import Timer
 async def adder_basic_test(dut):
     """Test for 5 + 10"""
 
-    A = 5
-    B = 10
 
-    dut.A.value = A
-    dut.B.value = B
+    dut.A.value = 5
+    dut.B.value = 10
 
     await Timer(2, units="ns")
 
-    assert dut.X.value == adder_model(
-        A, B
-    ), f"Adder result is incorrect: {dut.X.value} != 15"
+    assert dut.X.value == 5+10, f"Adder result is incorrect: {dut.X.value} != 15"
 
 
 @cocotb.test()

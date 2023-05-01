@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity ej_11 is
+entity bin2gray is
 
 	generic ( N : NATURAL := 8);
 	port (
@@ -10,9 +10,9 @@ entity ej_11 is
 		poBin  : out STD_LOGIC_VECTOR(N-1 downto 0)
 	);
 
-end ej_11;
+end bin2gray;
 
-architecture Arch_ej_11 of ej_11 is
+architecture Arch_bin2gray of bin2gray is
 
 signal sAux : STD_LOGIC_VECTOR(N-1 downto 0);
 
@@ -22,7 +22,7 @@ begin
 	sAux(N-2 downto 0) <= piGray(N-2 downto 0) xor sAux(N-1 downto 1);
 	poBin <= sAux;
 
-end Arch_ej_11;
+end Arch_bin2gray;
 
 -- Conversion binario a gray:
 -- b_n+1 = 0    g_i = b_i ^ b_i+1
