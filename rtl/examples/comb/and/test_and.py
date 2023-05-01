@@ -66,7 +66,7 @@ def test_simple_dff_runner():
     )
 
     try:
-        runner.test(toplevel=DUT, py_module="test_and", extra_args=["--wave=waveform.ghw", "--stop-delta=1000000"])
+        runner.test(toplevel=DUT, py_module=os.path.basename(__file__), extra_args=["--wave=waveform.ghw", "--stop-delta=1000000"])
     except:
         pass
         
