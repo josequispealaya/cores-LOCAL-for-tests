@@ -1,4 +1,0 @@
-v 4
-file / "/home/elrus0/proy/nanosat/git/cores/rtl/examples/comb/and/and.vhd" "f78a51d84829b8460f9b1f0935394b47bc5765d4" "20230501191154.771":
-  entity myand at 1( 0) + 0 on 11;
-  architecture arch_myand of myand at 12( 145) + 0 on 12;

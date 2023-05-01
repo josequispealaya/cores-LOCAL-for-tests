@@ -1,7 +1,0 @@
-<testsuites name="results">
-  <testsuite name="all" package="all">
-    <property name="random_seed" value="1682968314" />
-    <testcase name="and_test" classname="test_and" file="/home/elrus0/proy/nanosat/git/cores/rtl/examples/comb/and/test_and.py" lineno="19" time="0.0008258819580078125" sim_time_ns="8.000001" ratio_time="9686.615529533487" />
-    <testcase name="and_random_test" classname="test_and" file="/home/elrus0/proy/nanosat/git/cores/rtl/examples/comb/and/test_and.py" lineno="30" time="0.001148223876953125" sim_time_ns="20.000000999999997" ratio_time="17418.20685097674" />
-  </testsuite>
-</testsuites>
