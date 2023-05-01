@@ -10,13 +10,13 @@ import cocotb
 from cocotb.runner import get_runner
 from cocotb.triggers import Timer
 
-DUT = "and"
+DUT = "myand"
 
 ## puertos
 # piA, piB : in STD_LOGIC;
 # poZ : out STD_LOGIC
 
-@cocotb.test
+@cocotb.test()
 async def and_test(dut):
     for i in range(2):
         for j in range(2):
@@ -27,7 +27,7 @@ async def and_test(dut):
             assert dut.poZ.value == (i and j), "Error! Failed basic and test."
 
 
-@cocotb.test
+@cocotb.test()
 async def and_random_test(dut):
     for i in range(10):
         a = random.randint(0, 1)
@@ -66,7 +66,7 @@ def test_simple_dff_runner():
     )
 
     try:
-        runner.test(toplevel=DUT, py_module="test_uartTx", extra_args=["--wave=waveform.ghw", "--stop-delta=1000000"])
+        runner.test(toplevel=DUT, py_module="test_and", extra_args=["--wave=waveform.ghw", "--stop-delta=1000000"])
     except:
         pass
         
