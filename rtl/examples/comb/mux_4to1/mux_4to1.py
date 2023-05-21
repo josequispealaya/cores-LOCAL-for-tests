@@ -12,26 +12,27 @@ DUT ="ej_4"
 
 @cocotb.test()
 async def mux_4to1_test(dut):
-       for E in range(5):
-            for I in range(3):
+       for E in range(16):
+            for I in range(4):
                 dut.piSel.value = I  
                 dut.piE.value = E
 
 
                 await Timer(2, units='ns')
-
-                print(f"[{E}] piSel=|{dut.piSel.value}|poI0=|{dut.poI0.value}|poI1=|{dut.poI1.value}|poI2=|{dut.poI2.value}|poI3=|{dut.poI3.value}|")
+                print(f"piSel: {dut.piSel.value}")
+                assert dut.piSel.value != 4  , "Error! Failed basic and test."
+                print(f"poI0: {dut.poI0.value}\npoI1: {dut.poI1.value}\npoI2: {dut.poI2.value}\npoI3: {dut.poI3.value}\n")
 
 @cocotb.test()
 async def mux_4to1_test_random(dut):
        for E in range(10):
-                dut.piSel.value = random.randint(0, 1)  
-                dut.piE.value = random.randint(0, 4)
+                dut.piSel.value = random.randint(0, 3)  
+                dut.piE.value = random.randint(0, 15)
                 
 
                 await Timer(2, units='ns')
-
-                print(f"[{E}] piSel=|{dut.piSel.value}|poI0=|{dut.poI0.value}|poI1=|{dut.poI1.value}|poI2=|{dut.poI2.value}|poI3=|{dut.poI3.value}|")
+                assert dut.piSel.value != 4  , "Error! Failed basic and test."
+                
 
 def test_simple_dff_runner():
 
