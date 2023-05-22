@@ -1,0 +1,16 @@
+v 4
+file . "buttonChanger.vhd" "a2adf04a43e8af879a9d25684e02fa2cc0822cd3" "20230522035758.698":
+  entity buttonchanger at 1( 0) + 0 on 35;
+  architecture arch_buttonchanger of buttonchanger at 14( 239) + 0 on 36;
+file . "baudGen.vhd" "a4dfebbff52e29fcdb977252d02b73af313b94a0" "20230522035758.696":
+  entity baudgen at 1( 0) + 0 on 29;
+  architecture arch_baudgen of baudgen at 24( 412) + 0 on 30;
+file . "uartTx.vhd" "8ca4d21d09ae990e575c9dc815ad3d0f6b83d1bb" "20230522035758.697":
+  entity uarttx at 1( 0) + 0 on 31;
+  architecture arch_uarttx of uarttx at 24( 425) + 0 on 32;
+file . "uartRx.vhd" "fd5e8076b666f0f04fb5417a90a1eaf82e96a2a4" "20230522035758.698":
+  entity uartrx at 1( 0) + 0 on 33;
+  architecture arch_uartrx of uartrx at 26( 489) + 0 on 34;
+file . "uartLoopback.vhd" "a2a6bd25776027633f997761138ae16f1cc100f6" "20230522035758.699":
+  entity uart at 1( 0) + 0 on 37;
+  architecture arch_uart of uart at 22( 333) + 0 on 38;

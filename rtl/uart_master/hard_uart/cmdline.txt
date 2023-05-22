@@ -1,0 +1,1 @@
+yosys -m ghdl -p ghdl -dm buttonChanger.vhd baudGen.vhd uartTx.vhd uartRx.vhd uartLoopback.vhd -e uart;
