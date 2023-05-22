@@ -19,6 +19,10 @@ dockershell:  ## Run the development container
 	@$(call run_in_container, bash)
 
 
+test:  ## Run all tests or the ones for specific module setting DUT variable
+	@$(call run_in_container, ./run_cocotb_tests.sh ${DUT})
+
+
 flake8:  ## Run flake8 code quality check
 	$(eval PYTHON_FILES := $(shell find . -name "*.py"))
 	@$(call run_in_container, flake8 ${PYTHON_FILES})
@@ -33,4 +37,4 @@ quality: flake8 vsg  ## Run all quality check
 
 
 .DEFAULT_GOAL := help
-.PHONY: help build-docker dockershell flake8 vsg quality
+.PHONY: help build-docker dockershell test flake8 vsg quality
