@@ -1,3 +1,9 @@
+define run_in_container
+	docker run -it --rm \
+		-v $(PWD):/code -w /code \
+		${DOCKER_IMAGE_NAME} $(1)
+endef
+
 DOCKER_IMAGE_NAME = hdlcores:latest
 
 
@@ -9,5 +15,9 @@ build-docker:  ## Build the docker used for development
 	docker build --tag ${DOCKER_IMAGE_NAME} -f Dockerfile .
 
 
+dockershell:  ## Run the development container
+	@$(call run_in_container, bash)
+
+
 .DEFAULT_GOAL := help
-.PHONY: help build-docker
+.PHONY: help build-docker dockershell
