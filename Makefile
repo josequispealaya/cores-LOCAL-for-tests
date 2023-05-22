@@ -19,5 +19,18 @@ dockershell:  ## Run the development container
 	@$(call run_in_container, bash)
 
 
+flake8:  ## Run flake8 code quality check
+	$(eval PYTHON_FILES := $(shell find . -name "*.py"))
+	@$(call run_in_container, flake8 ${PYTHON_FILES})
+
+
+vsg:  ## Run vhdl-style-guide code quality check
+	$(eval VHDL_FILES := $(shell find rtl/ -name "*.vhd"))
+	@$(call run_in_container, vsg -f ${VHDL_FILES})
+
+
+quality: flake8 vsg  ## Run all quality check
+
+
 .DEFAULT_GOAL := help
-.PHONY: help build-docker dockershell
+.PHONY: help build-docker dockershell flake8 vsg quality
