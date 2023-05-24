@@ -1,7 +1,13 @@
 define run_in_container
 	docker run -it --rm \
+		-v /tmp/.X11-unix:/tmp/.X11-unix \
+		-v /var/run/dbus:/var/run/dbus \
+		--network host \
+		-e DISPLAY=$(DISPLAY) \
+		-e GUI=$(GUI) \
+		${EXTRA_ARGS} \
 		-v $(PWD):/code -w /code \
-		${DOCKER_IMAGE_NAME} $(1)
+		$(DOCKER_IMAGE_NAME) $(1)
 endef
 
 DOCKER_IMAGE_NAME = hdlcores:latest
@@ -20,6 +26,12 @@ dockershell:  ## Run the development container
 
 
 test:  ## Run all tests or the ones for specific module setting DUT variable
+	@$(call run_in_container, ./run_cocotb_tests.sh ${DUT})
+
+
+waves:  ## Run gtkwave with last test waves from DUT variable
+	@[ "${DUT}" ] || ( echo "Usage:    DUT=<module> make waves"; exit 1 )
+	$(eval GUI=1)
 	@$(call run_in_container, ./run_cocotb_tests.sh ${DUT})
 
 

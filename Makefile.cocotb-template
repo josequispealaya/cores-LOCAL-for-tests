@@ -3,9 +3,9 @@ TOPLEVEL_LANG ?= vhdl
 
 VHDL_SOURCES += ${DUT}.vhdl
 
-SIM_ARGS = --vcd=waves.vcd	# Solo para VHDL. En verilog el .vcd se renombra desde el source file.
+SIM_ARGS=--vcd=waves.vcd	# Solo para VHDL. En verilog el .vcd se renombra desde el source file.
 
-# TOPLEVEL es el nombre del módulo toplevel (el de los puertos) en tu archivo HDL.
+# TOPLEVEL es el nombre del modulo toplevel (el de los puertos) en tu archivo HDL.
 TOPLEVEL := ${DUT}
 
 # MODULE is the basename of the Python test file
