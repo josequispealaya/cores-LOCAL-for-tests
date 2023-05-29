@@ -10,6 +10,7 @@ from cocotb.triggers import Timer
 
 DUT ="ej_4"
 
+
 @cocotb.test()
 async def mux_4to1_test(dut):
        for E in range(16):
@@ -17,14 +18,19 @@ async def mux_4to1_test(dut):
                 dut.piSel.value = I  
                 dut.piE.value = E
 
-
+                
                 await Timer(2, units='ns')
                 
                 assert dut.piSel.value != 4 , "Error! Failed basic and test."
+                
+                list = [dut.poI0.value,dut.poI1.value,dut.poI2.value,dut.poI3.value]
+                
+                
+                assert list[int(dut.piSel.value)] == dut.piE.value and list.count(0) >= 3, "Error! Failed basic and test."
 
-                assert ((dut.poI0.value != dut.poI1.value) or (dut.poI2.value != dut.poI3.value) == (dut.poI2.value != dut.poI1.value) or (dut.poI0.value != dut.poI3.value)), "Error! Failed basic and test."
+               
+               
 
-                print(f"poI0: {dut.poI0.value} || poI1: {dut.poI1.value} || poI2: {dut.poI2.value} || poI3: {dut.poI3.value}\n")
 
 @cocotb.test()
 async def mux_4to1_test_random(dut):
@@ -35,8 +41,10 @@ async def mux_4to1_test_random(dut):
 
                 await Timer(2, units='ns')
                 assert dut.piSel.value != 4  , "Error! Failed basic and test."
-                assert ((dut.poI0.value != dut.poI1.value) or (dut.poI2.value != dut.poI3.value) == (dut.poI2.value != dut.poI1.value) or (dut.poI0.value != dut.poI3.value)), "Error! Failed basic and test."
 
+                list = [dut.poI0.value,dut.poI1.value,dut.poI2.value,dut.poI3.value]
+                                
+                assert list[int(dut.piSel.value)] == dut.piE.value and list.count(0) >= 3, "Error! Failed basic and test."
                 
 
 def test_simple_dff_runner():
