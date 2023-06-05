@@ -1,5 +1,3 @@
-#TODO
-
 import os
 import subprocess
 from pathlib import Path
@@ -10,40 +8,44 @@ import cocotb
 from cocotb.runner import get_runner
 from cocotb.triggers import Timer
 
-DUT = "myand"
-
-## puertos
-# piA, piB : in STD_LOGIC;
-# poZ : out STD_LOGIC
-
-@cocotb.test()
-async def and_test(dut):
-    for i in range(2):
-        for j in range(2):
-            dut.piA.value = i
-            dut.piB.value = j
-
-            await Timer(2, units='ns')
-            assert dut.poZ.value == (i and j), "Error! Failed basic and test."
+DUT ="ej_4"
 
 
 @cocotb.test()
-async def and_random_test(dut):
-    for i in range(10):
-        a = random.randint(0, 1)
-        b = random.randint(0, 1)
-        dut.piA.value = a
-        dut.piB.value = b
-        
-        await Timer(2, units='ns')
-        
-        z = dut.poZ.value
+async def mux_4to1_test(dut):
+       for E in range(16):
+            for I in range(4):
+                dut.piSel.value = I  
+                dut.piE.value = E
 
-        assert (a and b) == z, f"\
-            Error! failed random test\n\
-            a = {a}, b = {b}, z = {z}"
+                
+                await Timer(2, units='ns')
+                
+                assert dut.piSel.value != 4 , "Error! Failed basic and test."
+                
+                list = [dut.poI0.value,dut.poI1.value,dut.poI2.value,dut.poI3.value]
+                
+                
+                assert list[int(dut.piSel.value)] == dut.piE.value and list.count(0) >= 3, "Error! Failed basic and test."
 
-        print(f"values: a = {a}, b = {b}, z = {z}\n")
+               
+               
+
+
+@cocotb.test()
+async def mux_4to1_test_random(dut):
+       for E in range(10):
+                dut.piSel.value = random.randint(0, 3)  
+                dut.piE.value = random.randint(0, 15)
+                
+
+                await Timer(2, units='ns')
+                assert dut.piSel.value != 4  , "Error! Failed basic and test."
+
+                list = [dut.poI0.value,dut.poI1.value,dut.poI2.value,dut.poI3.value]
+                                
+                assert list[int(dut.piSel.value)] == dut.piE.value and list.count(0) >= 3, "Error! Failed basic and test."
+                
 
 def test_simple_dff_runner():
 
