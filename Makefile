@@ -16,6 +16,14 @@ help:  ## Shows the available targets
 	@grep -E '^[0-9a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 
+clean:  ## Clean building files
+	@$(call run_in_container, find . \
+		-name 'results.xml' -o \
+		-name 'sim.vpp' -o \
+		-name 'waveform.vcd' \
+		-exec rm -r {} \;)
+
+
 build-docker:  ## Build the docker used for development
 	docker build --no-cache --tag ${DOCKER_IMAGE_NAME} -f Dockerfile .
 
@@ -47,4 +55,4 @@ quality: flake8 verible  ## Run all quality check
 
 
 .DEFAULT_GOAL := help
-.PHONY: help build-docker dockershell test flake8 verible quality
+.PHONY: help clean build-docker dockershell test flake8 verible quality
