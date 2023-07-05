@@ -4,7 +4,6 @@ define run_in_container
 		-v /var/run/dbus:/var/run/dbus \
 		--network host \
 		-e DISPLAY=$(DISPLAY) \
-		-e GUI=$(GUI) \
 		${EXTRA_ARGS} \
 		-v $(PWD):/code -w /code \
 		$(DOCKER_IMAGE_NAME) $(1)
@@ -18,7 +17,7 @@ help:  ## Shows the available targets
 
 
 build-docker:  ## Build the docker used for development
-	docker build --tag ${DOCKER_IMAGE_NAME} -f Dockerfile .
+	docker build --no-cache --tag ${DOCKER_IMAGE_NAME} -f Dockerfile .
 
 
 dockershell:  ## Run the development container
@@ -31,22 +30,21 @@ test:  ## Run all tests or the ones for specific module setting DUT variable
 
 waves:  ## Run gtkwave with last test waves from DUT variable
 	@[ "${DUT}" ] || ( echo "Usage:    DUT=<module> make waves"; exit 1 )
-	$(eval GUI=1)
-	@$(call run_in_container, ./run_cocotb_tests.sh ${DUT})
+	@$(call run_in_container, ./run_cocotb_tests.sh ${DUT} --waves)
 
 
 flake8:  ## Run flake8 code quality check
 	$(eval PYTHON_FILES := $(shell find . -name "*.py"))
-	@$(call run_in_container, flake8 ${PYTHON_FILES})
+	@$(call run_in_container, flake8 ${PYTHON_FILES} --max-line-length=120)
 
 
-vsg:  ## Run vhdl-style-guide code quality check
-	$(eval VHDL_FILES := $(shell find rtl/ -name "*.vhd"))
-	@$(call run_in_container, vsg -f ${VHDL_FILES})
+verible:  ## Run verible-verilog-lint code quality check
+	$(eval VHDL_FILES := $(shell find rtl/ -name "*.v"))
+	@$(call run_in_container, verible-verilog-lint ${VHDL_FILES})
 
 
-quality: flake8 vsg  ## Run all quality check
+quality: flake8 verible  ## Run all quality check
 
 
 .DEFAULT_GOAL := help
-.PHONY: help build-docker dockershell test flake8 vsg quality
+.PHONY: help build-docker dockershell test flake8 verible quality
