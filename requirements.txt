@@ -1,3 +1,2 @@
-cocotb==1.7.2
+cocotb==1.8.0
 flake8==6.0.0
-vsg==3.15.0
