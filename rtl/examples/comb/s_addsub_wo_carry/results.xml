@@ -1,0 +1,8 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1710973411" />
+    <testcase name="test_s_addsub_wo_carry" classname="test_s_addsub_wo_carry" file="/code/tests/test_s_addsub_wo_carry.py" lineno="14" time="0.0029191970825195312" sim_time_ns="2000.001" ratio_time="685120.238018948">
+      <failure message="Test failed with RANDOM_SEED=1710973411" />
+    </testcase>
+  </testsuite>
+</testsuites>
