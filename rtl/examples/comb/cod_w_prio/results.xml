@@ -1,6 +1,6 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1710973411" />
-    <testcase name="test_cod_w_prio" classname="test_cod_w_prio" file="/code/tests/test_cod_w_prio.py" lineno="16" time="0.002392292022705078" sim_time_ns="6000.001" ratio_time="2508055.4309651186" />
+    <property name="random_seed" value="1711309229" />
+    <testcase name="test_cod_w_prio" classname="test_cod_w_prio" file="/code/tests/test_cod_w_prio.py" lineno="16" time="0.0022361278533935547" sim_time_ns="9000.001" ratio_time="4024815.032978356" />
   </testsuite>
 </testsuites>

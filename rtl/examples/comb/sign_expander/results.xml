@@ -1,0 +1,6 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1711321922" />
+    <testcase name="test_sign_expander" classname="test_sign_expander" file="/code/tests/test_sign_expander.py" lineno="13" time="0.007215261459350586" sim_time_ns="48000.001" ratio_time="6652565.713719855" />
+  </testsuite>
+</testsuites>
