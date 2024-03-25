@@ -51,23 +51,3 @@ module sign_expander_tb;
     #5 clk = 1'b1;
   end
 endmodule
-
-/*
-module ej_5_tb;
-
-  reg [3:0] i_A;
-  reg clk;
-  wire [7:0] poS;
-
-  ej_5 uut (
-    .i_A(i_A),
-    .clk(clk),
-    .poS(poS)
-  );
-
-  initial begin
-    $monitor("i_A = %b, poS = %b", i_A, poS);
-
-
-endmodule
-*/

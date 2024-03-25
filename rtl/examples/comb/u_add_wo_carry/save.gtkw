@@ -1,0 +1,24 @@
+[*]
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Mon Mar 25 13:53:40 2024
+[*]
+[dumpfile] "/home/nico/Documentos/UTN/PID/cores/rtl/examples/comb/u_add_wo_carry/waveform.vcd"
+[dumpfile_mtime] "Mon Mar 25 13:52:56 2024"
+[dumpfile_size] 3431
+[savefile] "/home/nico/Documentos/UTN/PID/cores/rtl/examples/comb/u_add_wo_carry/save.gtkw"
+[timestart] 0
+[size] 1600 827
+[pos] -301 -114
+*-22.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 212
+[signals_width] 94
+[sst_expanded] 1
+[sst_vpaned_height] 222
+@28
+u_add_wo_carry.clk
+u_add_wo_carry.i_A[3:0]
+u_add_wo_carry.i_B[3:0]
+@29
+u_add_wo_carry.o_Z[3:0]
+[pattern_trace] 1
+[pattern_trace] 0
