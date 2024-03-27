@@ -25,8 +25,10 @@ clean:  ## Clean building files
 
 
 build.docker:  ## Build the docker used for development
+	-docker image rm ${DOCKER_IMAGE_NAME}
 	docker build --no-cache --tag ${DOCKER_IMAGE_NAME} -f Dockerfile .
 
+# xhost +    <-- FIXME: Comando para solucionar el probleam del gtk 
 
 dockershell:  ## Run the development container
 	@$(call run_in_container, bash)

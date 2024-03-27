@@ -1,9 +1,24 @@
 `timescale 1us / 1ns
 
 module spi_slave #(
-    parameter CLK_RATE = 100000,
+    parameter CLK_RATE = 100000,    // TODO: Sacar
     parameter DATA_LEN = 8
 ) (
+    //-------------------------------------------------
+    //             ------------------
+    //             |                |
+    //             |                |<-- tx_tdata
+    // spi_miso <--|                |<-- tx_tvalid
+    // spi_mosi -->|   SPI_SLAVE    |--> tx_tready
+    // spi_sclk -->|                |
+    // spi_cs_n -->|                |--> rx_tdata
+    //             |                |--> rx_tvalid
+    //             |                |<-- rx_tready
+    //             |                |
+    //      clk -->|>>              |<-- rst
+    //             ------------------
+    //-------------------------------------------------
+
     input                   clk,
     input                   rst,
     // axi stream to transmit
