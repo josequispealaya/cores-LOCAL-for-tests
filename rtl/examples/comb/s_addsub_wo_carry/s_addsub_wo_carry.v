@@ -1,15 +1,12 @@
 module s_addsub_wo_carry #(
     parameter N = 4
 )(
-    input [N-1:0] piA,
-    input [N-1:0] piB,
-    input piOp,
-    output reg [N-1:0] poZ
+    input signed [N-1:0] i_A,
+    input signed [N-1:0] i_B,
+    input i_Op,
+    output [N-1:0] o_Z
 );
-    
-always @(*) begin
-    if(piOp == 0) poZ <= piA + piB;
-    else poZ <= piA - piB;
-end
+
+assign o_Z = (i_Op == 0) ? (i_A + i_B) : (i_A - i_B);
 
 endmodule

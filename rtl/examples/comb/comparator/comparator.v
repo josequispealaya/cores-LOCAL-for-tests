@@ -1,32 +1,18 @@
 module comparator #(
     parameter N = 8
 ) (
-    input wire [N-1:0] piA,
-    input wire [N-1:0] piB,
-    output reg poMayor,
-    output reg poMenor,
-    output reg poIgual
+    input wire unsigned [N-1:0] i_A,
+    input wire unsigned [N-1:0] i_B,
+    output reg o_Mayor,
+    output reg o_Menor,
+    output reg o_Igual
 );
 
-always @(*) begin
-  
-    if(piA > piB) begin
-        poMayor <= 1;
-        poMenor <= 0;
-        poIgual <= 0;
-    end
-    else if(piA < piB) begin
-        poMayor <= 0;
-        poMenor <= 1;
-        poIgual <= 0;
-    end
-    else begin
-        poMayor <= 0;
-        poMenor <= 0;
-        poIgual <= 1;
-    end
+wire [2:0] w_out;
 
-
-end
+assign w_out = (i_A > i_B) ? 3'b100 : ((i_A < i_B) ? 3'b010 : 3'b001);
+assign o_Mayor = w_out[2];
+assign o_Menor = w_out[1];
+assign o_Igual = w_out[0];
 
 endmodule

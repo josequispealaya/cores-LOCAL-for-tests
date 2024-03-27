@@ -1,19 +1,14 @@
 module bin2gray #(
     parameter N = 8
 ) (
-    input [N-1:0] piGray,
-    output reg [N-1:0] poBin
+    input [N-1:0] i_Gray,
+    output reg [N-1:0] o_Bin
 );
 
-integer i;
+wire [N-1:0] w_aux;
 
-always @(*) begin
-
-    poBin[N-1] <= piGray[N-1];
-
-    for (i = 0; i < (N-1) ; i = i + 1 ) begin
-        poBin[N-2-i] <= (poBin[N-2-i+1] ^ piGray[N-2-i]); 
-    end 
-end
+assign w_aux[N-1] = i_Gray[N-1];
+assign w_aux[N-2:0] = i_Gray[N-2:0] ^ w_aux[N-1:1];
+assign o_Bin = w_aux;
 
 endmodule

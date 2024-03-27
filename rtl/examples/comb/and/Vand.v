@@ -1,7 +1,7 @@
 module Vand (
-    input a,
-    input b,
-    output z
+    input i_a,
+    input i_b,
+    output o_z
 );
-    assign z = a & b;
+    assign o_z = i_a & i_b;
 endmodule
