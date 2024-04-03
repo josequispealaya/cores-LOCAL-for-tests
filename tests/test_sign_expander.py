@@ -1,5 +1,5 @@
 #
-#   Verilog sign expander
+#   Cobotb test bench for sign expander module
 #
 import cocotb
 import random
