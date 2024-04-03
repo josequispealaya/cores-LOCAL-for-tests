@@ -1,3 +1,4 @@
+/*brief: returns inputs expanded to 8 bits*/
 module sign_expander(input clk, input [3:0] i_A, output reg [7:0] o_Z);
 
   always @(posedge clk) begin

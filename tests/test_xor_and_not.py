@@ -1,5 +1,5 @@
 #
-#   Verilog XOR AND NOT (XOR AND NOT)
+#   cocotb testbench for xor and not module
 #
 import cocotb
 import random
