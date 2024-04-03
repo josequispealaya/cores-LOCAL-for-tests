@@ -18,14 +18,14 @@ module comp_bin_despl #(
   logic [N-1:0] sA, sB;
 
   always @(posedge clk) begin
-	assign poMayor  = sAgtB;
-	assign poIgual  = sAeqB;
-	assign poMenor  = ~sAgtB & ~sAeqB;
+	  poMayor  = sAgtB;
+	  poIgual  = sAeqB;
+	  poMenor  = ~sAgtB & ~sAeqB;
 
-	assign sA       = (i_Ctrl) ? ~(i_A[N-1]) & i_A[N-2:0] : i_A;
-	assign sB       = (i_Ctrl) ? ~(i_B[N-1]) & i_B[N-2:0] : i_B;
+	  sA       = (i_Ctrl) ? ~(i_A[N-1]) & i_A[N-2:0] : i_A;
+	  sB       = (i_Ctrl) ? ~(i_B[N-1]) & i_B[N-2:0] : i_B;
 
-	assign sAgtB    = unsigned'(sA) > unsigned'(sB);
-	assign sAeqB    = unsigned'(sA) == unsigned'(sB);
+	  sAgtB    = unsigned'(sA) > unsigned'(sB);
+	  sAeqB    = unsigned'(sA) == unsigned'(sB);
   end
 endmodule
