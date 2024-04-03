@@ -1,4 +1,4 @@
-"""Verilog And (Vand)
+"""Verilog And
 
 Testbench de una compuerta AND escrita en verilog
 con entradas que varían cada un microsegundo
@@ -13,7 +13,7 @@ from cocotb.triggers import Timer
 MAX_ITERATIONS = 10
 
 @cocotb.test()
-async def test_deterministic_Vand(dut):
+async def test_deterministic_And(dut):
 
     dut.i_a.value = 0
     dut.i_b.value = 0
@@ -52,7 +52,7 @@ async def test_deterministic_Vand(dut):
         i_a = {dut.i_a.value}, i_b = {dut.i_b.value}, o_z = {dut.o_z.value}"
 
 @cocotb.test()
-async def test_random_Vand(dut):
+async def test_random_And(dut):
 
     #iterNumber = random.randint(1,MAX_ITERATIONS)
     iterNumber = 4

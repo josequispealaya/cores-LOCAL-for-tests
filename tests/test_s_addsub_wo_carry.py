@@ -60,8 +60,9 @@ async def test_s_addsub_wo_carry_deterministic(dut):
 @cocotb.test()
 async def test_s_addsub_wo_carry_random(dut):
 
-    iterNumber = random.randint(1,MAX_ITERATIONS)
+    #iterNumber = random.randint(1,MAX_ITERATIONS)
     maxNumber = pow(2,N)
+    iterNumber = 10
 
     for i in range(iterNumber):
 
