@@ -1,6 +1,0 @@
-<testsuites name="results">
-  <testsuite name="all" package="all">
-    <property name="random_seed" value="1712112325" />
-    <testcase name="test_u_add_wo_carry" classname="test_u_add_wo_carry" file="/code/tests/test_u_add_wo_carry.py" lineno="25" time="0.004891633987426758" sim_time_ns="30000.001" ratio_time="6132920.221977092" />
-  </testsuite>
-</testsuites>
