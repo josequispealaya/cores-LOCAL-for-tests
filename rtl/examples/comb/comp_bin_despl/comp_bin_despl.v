@@ -14,18 +14,18 @@ module comp_bin_despl #(
   output reg     o_Menor
 );
 
-  logic sAgtB, sAeqB;
-  logic [N-1:0] sA, sB;
+  reg r_AgtB, r_AeqB;
+  reg [N-1:0] r_A, r_B;
 
-  always @(posedge clk) begin
-	  poMayor  = sAgtB;
-	  poIgual  = sAeqB;
-	  poMenor  = ~sAgtB & ~sAeqB;
+  always @(posedge i_Clk) begin
+	  o_Mayor  = r_AgtB;
+	  o_Igual  = r_AeqB;
+	  o_Menor  = ~r_AgtB & ~r_AeqB;
 
-	  sA       = (i_Ctrl) ? ~(i_A[N-1]) & i_A[N-2:0] : i_A;
-	  sB       = (i_Ctrl) ? ~(i_B[N-1]) & i_B[N-2:0] : i_B;
+	  r_A       = (i_Ctrl) ? ~(i_A[N-1]) & i_A[N-2:0] : i_A;
+	  r_B       = (i_Ctrl) ? ~(i_B[N-1]) & i_B[N-2:0] : i_B;
 
-	  sAgtB    = unsigned'(sA) > unsigned'(sB);
-	  sAeqB    = unsigned'(sA) == unsigned'(sB);
+	  r_AgtB    = unsigned'(r_A) > unsigned'(r_B);
+	  r_AeqB    = unsigned'(r_A) == unsigned'(r_B);
   end
 endmodule
