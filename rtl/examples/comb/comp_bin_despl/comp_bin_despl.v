@@ -25,7 +25,7 @@ module comp_bin_despl #(
 	  r_A       = (i_Ctrl) ? ~(i_A[N-1]) & i_A[N-2:0] : i_A;
 	  r_B       = (i_Ctrl) ? ~(i_B[N-1]) & i_B[N-2:0] : i_B;
 
-	  r_AgtB    = unsigned'(r_A) > unsigned'(r_B);
-	  r_AeqB    = unsigned'(r_A) == unsigned'(r_B);
+	  r_AgtB    = $unsigned(r_A) > $unsigned(r_B);
+	  r_AeqB    = $unsigned(r_A) == $unsigned(r_B);
   end
 endmodule

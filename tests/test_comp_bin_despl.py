@@ -3,10 +3,11 @@
 #
 import cocotb
 import random
+import builtins
 
 from cocotb.triggers import Timer
 from cocotb.clock import Clock
-
+from builtins import bin
 
 MAX_ITERATIONS = 10
 
@@ -14,12 +15,12 @@ MAX_ITERATIONS = 10
 @cocotb.test()
 async def test_comp_bin_despl(dut):
 
-    cocotb.start_soon(Clock(dut.clk, 1, units="ns").start())  # Create and start the clock
+    cocotb.start_soon(Clock(dut.i_Clk, 1, units="ns").start())  # Create and start the clock
 
     for _ in range(MAX_ITERATIONS):
         # Generate random binary numbers
-        a = random.randint(0, 2**dut.N - 1)  # Range for N-bit unsigned number
-        b = random.randint(0, 2**dut.N - 1)
+        a = random.randint(0, 2**dut.N.value - 1)  # Range for N-bit unsigned number
+        b = random.randint(0, 2**dut.N.value - 1)
 
         dut.i_A.value = a
         dut.i_B.value = b
@@ -29,8 +30,8 @@ async def test_comp_bin_despl(dut):
         await Timer(3, 'us')
 
         # Check outputs based on expected comparisons
-        expected_mayor = unsigned(a) > unsigned(b)
-        expected_igual = unsigned(a) == unsigned(b)
+        expected_mayor = int(bin(a),2) > int(bin(b),2) #Convierto a binario, luego a entero en base dos, haciendo la variable unsigned
+        expected_igual = int(bin(a),2) == int(bin(b),2)
         expected_menor = not expected_mayor and not expected_igual
 
         assert dut.o_Mayor.value == expected_mayor, f"\
