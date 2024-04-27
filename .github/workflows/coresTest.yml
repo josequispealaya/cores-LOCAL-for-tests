@@ -8,4 +8,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Test cores
-      run: make build-docker 
+      run: | 
+        make build-docker 
+        make test DUT=comp_bin_despl
