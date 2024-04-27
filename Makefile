@@ -23,6 +23,8 @@ clean:  ## Clean building files
 		-name 'waveform.vcd' \
 		-exec rm -r {} \;)
 
+pull-docker:
+	docker pull ghcr.io/utn-ba-sats/hdlcores:latest
 
 build-docker:  ## Build the docker used for development
 	docker build --no-cache --tag ${DOCKER_IMAGE_NAME} -f Dockerfile .
