@@ -9,7 +9,7 @@ jobs: #Son los trabajos que realizara, en este caso de forma secuencial
     - uses: actions/checkout@v4 #Es una accion propia de actions, lo que hace es traer la ultima version de tu rama
 
 #    - name: Build Image #Nombre de este step
-#      run: make build-docker #Comando que va a correr
+#      run: make build-docker #Comando que va a ejecutar
 
     - name: Docker Login
       run: docker login --username utn-ba-sats --password ${{ secrets.GITHUB_TOKEN }} ghrc.io
