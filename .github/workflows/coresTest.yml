@@ -11,5 +11,8 @@ jobs: #Son los trabajos que realizara, en este caso de forma secuencial
 #    - name: Build Image #Nombre de este step
 #      run: make build-docker #Comando que va a correr
 
+    - name: Docker Login
+      run: docker login --username utn-ba-sats --password ${{ secret.HDLCORES_PASS }} ghrc.io
+
     - name: Test cores
       run: make test 
