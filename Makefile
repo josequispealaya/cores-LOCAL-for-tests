@@ -9,7 +9,7 @@ define run_in_container
 		$(DOCKER_IMAGE_NAME) $(1)
 endef
 
-DOCKER_IMAGE_NAME = hdlcores:latest
+DOCKER_IMAGE_NAME = ghcr.io/utn-ba-sats/hdlcores:latest
 
 
 help:  ## Shows the available targets
