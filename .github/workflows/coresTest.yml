@@ -1,15 +1,15 @@
-name: Cores test
+name: CoresTest #Nombre del workflow
 
-on: push
+on: push #Accion con la que se activa, en este caso con un push en cualquier branch
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
+jobs: #Son los trabajos que realizara, en este caso de forma secuencial
+  Test:
+    runs-on: ubuntu-latest #OS que usará la vm de github para correr el workflow
+    steps: #pasos del workflow
+    - uses: actions/checkout@v4 #Es una accion propia de actions, lo que hace es traer la ultima version de tu rama
 
-    - name: Build Image
-      run: make build-docker 
+    - name: Build Image #Nombre de este step
+      run: make build-docker #Comando que va a correr
 
     - name: Test cores
-      run: make test DUT=comp_bin_despl
+      run: make test 
