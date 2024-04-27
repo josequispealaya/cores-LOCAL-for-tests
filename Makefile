@@ -1,5 +1,5 @@
 define run_in_container
-	docker run --rm \
+	docker run -t --rm \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
 		-v /var/run/dbus:/var/run/dbus \
 		--network host \
