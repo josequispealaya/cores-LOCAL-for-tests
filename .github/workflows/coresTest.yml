@@ -12,7 +12,7 @@ jobs: #Son los trabajos que realizara, en este caso de forma secuencial
 #      run: make build-docker #Comando que va a correr
 
     - name: Docker Login
-      run: docker login --username utn-ba-sats --password ${{ secrets.HDLCORES_PASS }} ghrc.io
+      run: docker login --username utn-ba-sats --password ${{ secrets.GITHUB_TOKEN }} ghrc.io
 
     - name: Test cores
       run: make test 
