@@ -5,7 +5,7 @@ define run_in_container
 		--network host \
 		-e DISPLAY=$(DISPLAY) \
 		${EXTRA_ARGS} \
-		-v $(PWD):/code -w /code \
+		-v $(CURDIR):/code -w /code \
 		$(DOCKER_IMAGE_NAME) $(1)
 endef
 
