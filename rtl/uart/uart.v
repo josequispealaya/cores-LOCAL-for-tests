@@ -1,5 +1,5 @@
 module uart #(
-    parameter DIV_BITS = 10;
+    parameter DIV_BITS = 10
 ) (
     input i_clk,
     input i_rst,

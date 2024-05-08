@@ -3,14 +3,14 @@ module uart_tx (
     // input stream
     input [8-1:0] i_data,
     input i_valid,
-    output o_ready,
+    output reg o_ready,
 
     // control signal
     input i_clk,
     input i_rst,
 
     input i_txpulse,
-    output o_txd
+    output reg o_txd
 
 );
 

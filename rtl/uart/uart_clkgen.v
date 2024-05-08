@@ -8,8 +8,8 @@ module uart_clkgen #(
 
     input i_rxsync,
     
-    output o_txpulse,
-    output o_rxpulse
+    output reg o_txpulse,
+    output reg o_rxpulse
 );
 
 reg [DIV_BITS-1:0] r_txclk;

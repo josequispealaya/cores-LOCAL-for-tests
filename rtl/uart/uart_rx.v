@@ -1,6 +1,6 @@
 module uart_rx (
     //stream interface
-    output [8-1:0] o_data,
+    output reg [8-1:0] o_data,
     output o_valid,
     input i_ready,
 
@@ -11,8 +11,8 @@ module uart_rx (
 
     input i_rxpulse,
     
-    output o_err,
-    output o_rxsync
+    output reg o_err,
+    output reg o_rxsync
 );
 
 localparam STATE_BITS = 2;
@@ -89,7 +89,7 @@ always @(posedge i_rst or posedge i_clk) begin
                         r_actstate <= S_RXRECV;
                         o_rxsync <= 1'b1;
                         r_samplecntr <= 2'd2;
-                        r_bitcntr <= 3'b7;
+                        r_bitcntr <= 3'd7;
                         r_samplereg <= 'b0;
                         r_valid <= 1'b0;
                     end
@@ -109,7 +109,7 @@ always @(posedge i_rst or posedge i_clk) begin
 
                 S_RXEND : begin
 
-                    if (r_safebit = 1'b1) begin
+                    if (r_safebit == 1'b1) begin
                         r_actstate <= S_IDLE;
                         o_data <= r_rxdata;
                         r_valid <= 1'b1;
@@ -119,11 +119,12 @@ always @(posedge i_rst or posedge i_clk) begin
 
                 end
 
-                S_RXERR,
-                default : begin
+                S_RXERR : begin
                     r_actstate <= S_IDLE;
                     o_err <= 1'b1;
                 end
+
+                default : r_actstate <= S_IDLE;
 
             endcase
 
