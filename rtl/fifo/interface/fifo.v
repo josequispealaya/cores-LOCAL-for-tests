@@ -47,13 +47,6 @@ FIFO_internal #(ADDR_LENGTH, WORD_LENGTH) fifo_internal (
 );
 
 always @(*) begin
-    if(reset == 1'b1) begin
-        data_out_valid = 1'b0;
-        ready_in = 1'b1;
-        state_in = IDLE_IN;
-        state_out = IDLE_OUT;
-    end
-
 // Input handshake next state logic
     case(state_in)
         IDLE_IN : begin
@@ -153,11 +146,16 @@ always @(*) begin
 end
 
 always @(posedge clk) begin
-    state_in <= next_state_in;
-    state_out <= next_state_out;
+    if(reset == 1) begin
+        state_in <= IDLE_IN;
+        state_out <= IDLE_OUT;
+    end else begin
+        state_in <= next_state_in;
+        state_out <= next_state_out;
 
-    if(empty == 1'b0) begin
-        data_out <= internal_data_out;
+        if(empty == 1'b0) begin
+            data_out <= internal_data_out;
+        end
     end
 end
 

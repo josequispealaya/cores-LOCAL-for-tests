@@ -39,20 +39,18 @@ RAM_DUALPORT #(ADDR_LENGTH, WORD_LENGTH) memory (
     .data_out(data_out)
 );
 
-always @(*) begin
-    if(reset == 1'b1) begin
-        r_addr = {ADDR_LENGTH{1'b0}};
-        w_addr = {ADDR_LENGTH{1'b0}};
-    end
-end
-
 always @(posedge clk) begin
-    if(read_en == 1'b1 && !empty) begin
-        r_addr <= next_r_addr;
-    end
+    if(reset == 1) begin
+        r_addr <= {ADDR_LENGTH{1'b0}};
+        w_addr <= {ADDR_LENGTH{1'b0}};
+    end else begin
+        if(read_en == 1'b1 && !empty) begin
+            r_addr <= next_r_addr;
+        end
 
-    if(write_en == 1'b1 && !full) begin
-        w_addr <= next_w_addr;
+        if(write_en == 1'b1 && !full) begin
+            w_addr <= next_w_addr;
+        end
     end
 end
 
