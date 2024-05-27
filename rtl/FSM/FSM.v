@@ -3,7 +3,8 @@ module FSM #(
      parameter ADDR_VALUE_READ = 78,
      parameter CONFIG_REGISTER_WRITE = 9,
      parameter CONFIG_REGISTER_READ = 3,
-     parameter CONFIG_REGISTER_DATA = 4
+     parameter CONFIG_REGISTER_DATA = 4,
+     parameter SENSOR_DATA = 0
 )(
      input i_clk, 
      input i_ack, 
@@ -59,8 +60,11 @@ always @(r_state)
                               o_addr_bits = ADDR;
                               o_addr_valid = 1;
                               o_start = 1;
-                         LOAD_NBYTES:
+                         LOAD_REG:
                               o_start = 0;                       //Para generar un pulso del start ya que a este estado ingreso luego de LOAD_ADDR
+                              o_data_bits = SENSOR_DATA; 
+                              o_data_valid = 1;
+                         LOAD_NBYTES:
                               o_nbytes_bits = DATA_DEPTH;
                               o_nbytes_valid = 1;
                          ANALYSE_DATA:
@@ -116,7 +120,7 @@ always @(r_state)
                               o_start = 1;
                          LOAD_REG:
                               o_start = 0;                       //Para generar un pulso del start ya que a este estado ingreso luego de LOAD_ADDR
-                              o_data_bits = CONFIG_REGISTER_WRITE; 
+                              o_data_bits = SENSOR_DATA; 
                               o_data_valid = 1;
                          LOAD_NBYTES:
                               o_nbytes_bits = DATA_DEPTH;
