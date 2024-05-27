@@ -22,16 +22,12 @@ async def test_FSM(dut):
     cocotb.start_soon(clock(dut))
 
     dut.i_rst.value = 1
-    dut.i_ack.value = 0
-    dut.i_conf.value = 0
 
     await Timer(30, 'us')
 
     dut.i_rst.value = 0
 
     await Timer(50, 'us')
-    
-    dut.i_conf.value = 1
 
     await Timer(1000, 'us')
 
