@@ -58,8 +58,9 @@ module i2c_master_oe #(
 
     //strict output lines
     output o_sda_out,
-    output o_scl_out
+    output o_scl_out,
     
+    output o_nak
 
 );
 
@@ -110,6 +111,8 @@ reg r_fsm_tick;
 reg r_oe_sda;
 reg r_oe_scl;
 
+reg r_nak;
+
 // INTERNAL WIRES
 
 wire w_rw_flag;
@@ -127,6 +130,8 @@ assign o_scl_oe = r_oe_scl;
 assign o_sda_oe = r_oe_sda;
 
 assign w_rw_flag = r_addr_latch[0];
+
+assign o_nak = r_nak;
 
 // FSM
 
@@ -157,6 +162,8 @@ always @(posedge i_clk or posedge i_rst) begin
         
         r_osda <= 1'b1;
         r_oscl <= 1'b1;
+
+        r_nak <= 1'b0;
 
 
     end else begin
@@ -193,6 +200,8 @@ always @(posedge i_clk or posedge i_rst) begin
             end
 
             S_START: begin
+
+                r_nak <= 1'b0;
 
                 if (r_fsm_tick == 1'b1) begin
                     
@@ -290,6 +299,7 @@ always @(posedge i_clk or posedge i_rst) begin
                                 if (i_sda_in == 1'b1) begin
                                     //NAK
                                     r_nstate <= S_STOP;
+                                    r_nak <= 1'b1;
                                 end else begin
                                     r_proc_cntr <= 2'd3;
                                 end

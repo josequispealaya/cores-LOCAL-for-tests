@@ -32,7 +32,9 @@ module FSM #(
      //write interface
      input i_data_write_ready,                         
      output reg [DATA_DEPTH-1:0] o_data_write_bits,
-     output reg o_data_write_valid
+     output reg o_data_write_valid,
+
+     input i_nak
 
 );
 
@@ -176,11 +178,11 @@ always @(posedge i_clk or posedge i_rst)
                               r_i2c_load_data_contr = ANALYSE_DATA;
                          end
 
-                         if(/*hubo NACK*/ & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin           
+                         if(i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin           
                               r_state = ADDR;
                               r_counterAck = r_counterAck + 1;
                          end
-                         else if(/*hubo ACK*/ & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin  
+                         else if(!i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin  
                               r_state = CONFIGUWRITE;
                               r_counterAck = 0;
                          end
@@ -206,11 +208,11 @@ always @(posedge i_clk or posedge i_rst)
                               r_i2c_load_data_contr = LOAD_DATA;
                          end
 
-                         if(/*hubo NACK*/ & (r_i2c_load_data_contr==LOAD_DATA) & i_addr_ready) begin           
+                         if(i_nak & (r_i2c_load_data_contr==LOAD_DATA) & i_addr_ready) begin           
                               r_state = CONFIGUWRITE;
                               r_counterAck = r_counterAck + 1;
                          end
-                         else if(/*hubo ACK*/ & (r_i2c_load_data_contr==LOAD_DATA) & i_addr_ready) begin  
+                         else if(!i_nak & (r_i2c_load_data_contr==LOAD_DATA) & i_addr_ready) begin  
                               r_state = CONFIGREAD;
                               r_counterAck = 0;
                          end
@@ -239,11 +241,11 @@ always @(posedge i_clk or posedge i_rst)
                               r_i2c_load_data_contr = ANALYSE_DATA;
                          end
 
-                         if(/*hubo NACK*/ & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin           
+                         if(i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin           
                               r_state = CONFIGREAD;
                               r_counterAck = r_counterAck + 1;
                          end
-                         else if(/*hubo ACK*/ & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin  
+                         else if(!i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin  
                               if(r_data_read == CONFIG_REGISTER_DATA) begin
                                    r_state = READING;
                                    r_counterAck = 0;
@@ -280,11 +282,11 @@ always @(posedge i_clk or posedge i_rst)
                               r_i2c_load_data_contr = ANALYSE_DATA;
                          end
 
-                         if(/*hubo NACK*/ & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin           
+                         if(i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin           
                               r_state = READING;
                               r_counterAck = r_counterAck + 1;
                          end
-                         else if(/*hubo ACK*/ & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin  
+                         else if(!i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin  
                               r_state = READING;
                               r_counterAck = 0;
                               r_counterConfig = 0;
