@@ -1,10 +1,10 @@
 module FSM #(
      parameter DATA_DEPTH = 8,
-     parameter NBYTES = 1,
-     parameter ADDR_SLAVE_READ = 78,
-     parameter ADDR_SLAVE_WRITE = 79,
-     parameter CONFIG_REGISTER_WRITE = 9,
-     parameter CONFIG_REGISTER_READ = 3,
+     parameter NBYTES = 0,         //El i2c_master empeiza a contar desde el cero (0=leer una vez)
+     parameter ADDR_SLAVE_READ = 79,
+     parameter ADDR_SLAVE_WRITE = 78,
+     parameter CONFIG_REGISTER_WRITE = 3,         //A modo de prueba se cambio el valor para que sea el mismo y se pueda comprobar
+     parameter CONFIG_REGISTER_READ = 3,          //el valor real del sensor de temperatura es 0x09 para escribir y 0x03 para leer
      parameter CONFIG_REGISTER_DATA = 4,
      parameter SENSOR_DATA = 0
 )(
@@ -48,6 +48,7 @@ reg [2:0] r_i2c_load_data_contr;
 
 //Otros registros
 reg r_prev_nak;
+reg [2:0] r_prev_contr;
 
 //Estados
 parameter ADDR=0, CONFIGUWRITE=1, CONFIGREAD=2, READING=3, NORESPOND=4, RESET=5;
@@ -74,7 +75,7 @@ always @(r_state or r_i2c_load_data_contr)
                ADDR: begin
                     case (r_i2c_load_data_contr) 
                          LOAD_ADDR: begin
-                              o_addr_bits = ADDR_SLAVE_WRITE;
+                              o_addr_bits = ADDR_SLAVE_READ;
                               o_addr_valid = 1;
                               o_start = 1;
                          end
@@ -126,10 +127,25 @@ always @(r_state or r_i2c_load_data_contr)
                          end
                          CHANGE_VALID: begin
                               o_data_write_valid = 0;
+                              o_addr_valid = 0;
                          end
                          LOAD_DATA: begin
-                              o_data_write_bits = CONFIG_REGISTER_DATA;
+                              o_data_write_bits = CONFIG_REGISTER_DATA; 
                               o_data_write_valid = 1;
+                              o_addr_bits = ADDR_SLAVE_WRITE;
+                              o_addr_valid = 1;
+                         end
+                         ANALYSE_DATA: begin
+                              o_addr_bits = NONE;
+                              o_addr_valid = 0;
+                              o_data_write_bits = NONE; 
+                              o_data_write_valid = 0;
+                         end
+                         IDLE: begin
+                              o_addr_bits = NONE;
+                              o_addr_valid = 0;
+                              o_data_write_bits = NONE; 
+                              o_data_write_valid = 0;
                          end
 
                     endcase
@@ -137,33 +153,47 @@ always @(r_state or r_i2c_load_data_contr)
                CONFIGREAD: begin
                     case (r_i2c_load_data_contr)
                          LOAD_ADDR: begin
-                              o_addr_bits = ADDR_SLAVE_WRITE;
+                              o_addr_bits = ADDR_SLAVE_READ;
                               o_addr_valid = 1;
                               o_start = 1;
                          end
                          LOAD_REG: begin
                               o_start = 0;                       //Para generar un pulso del start ya que a este estado ingreso luego de LOAD_ADDR
-                              o_data_write_bits = CONFIG_REGISTER_WRITE; 
+                              o_data_write_bits = CONFIG_REGISTER_READ; 
                               o_data_write_valid = 1;
+                         end
+                         CHANGE_VALID: begin
+                              o_data_write_valid = 0;
+                              o_addr_valid = 0;
                          end
                          LOAD_NBYTES: begin
                               o_nbytes_bits = NBYTES;
+                              o_addr_bits = ADDR_SLAVE_READ;
+                              o_addr_valid = 1;
                               o_nbytes_valid = 1;
                          end
                          ANALYSE_DATA: begin
                               o_addr_bits = NONE;
                               o_addr_valid = 0;
-                              o_data_write_bits = NONE; 
-                              o_data_write_valid = 0;
                               o_nbytes_bits = NONE;
                               o_nbytes_valid = 0;
+                              o_data_write_bits = NONE; 
+                              o_data_write_valid = 0;
+                         end
+                         IDLE: begin
+                              o_addr_bits = NONE;
+                              o_addr_valid = 0;
+                              o_nbytes_bits = NONE;
+                              o_nbytes_valid = 0;
+                              o_data_write_bits = NONE; 
+                              o_data_write_valid = 0;
                          end
                     endcase
                end
                READING: begin
                     case (r_i2c_load_data_contr)
                          LOAD_ADDR: begin
-                              o_addr_bits = ADDR_SLAVE_WRITE;
+                              o_addr_bits = ADDR_SLAVE_READ;
                               o_addr_valid = 1;
                               o_start = 1;
                          end
@@ -172,17 +202,31 @@ always @(r_state or r_i2c_load_data_contr)
                               o_data_write_bits = SENSOR_DATA; 
                               o_data_write_valid = 1;
                          end
+                         CHANGE_VALID: begin
+                              o_data_write_valid = 0;
+                              o_addr_valid = 0;
+                         end
                          LOAD_NBYTES: begin
                               o_nbytes_bits = NBYTES;
+                              o_addr_bits = ADDR_SLAVE_READ;
+                              o_addr_valid = 1;
                               o_nbytes_valid = 1;
                          end
                          ANALYSE_DATA: begin
                               o_addr_bits = NONE;
                               o_addr_valid = 0;
-                              o_data_write_bits = NONE; 
-                              o_data_write_valid = 0;
                               o_nbytes_bits = NONE;
                               o_nbytes_valid = 0;
+                              o_data_write_bits = NONE; 
+                              o_data_write_valid = 0;
+                         end
+                         IDLE: begin
+                              o_addr_bits = NONE;
+                              o_addr_valid = 0;
+                              o_nbytes_bits = NONE;
+                              o_nbytes_valid = 0;
+                              o_data_write_bits = NONE; 
+                              o_data_write_valid = 0;
                          end
                     endcase
                end
@@ -229,6 +273,7 @@ always @(posedge i_clk or posedge i_rst)
                r_counterConfig = 0;
                r_i2c_load_data_contr = IDLE;
                r_prev_nak = 0;
+               r_prev_contr = IDLE;
           end
           else begin
                case (r_state)
@@ -266,7 +311,7 @@ always @(posedge i_clk or posedge i_rst)
                               r_prev_nak = i_nak;
                          end
 
-                         if(r_counterAck >= 10) begin
+                         if(r_counterAck >= 10 & i_addr_ready) begin
                               r_state = NORESPOND;
                          end
                          
@@ -274,7 +319,53 @@ always @(posedge i_clk or posedge i_rst)
 
                     CONFIGUWRITE: begin
 
-                         if(i_addr_ready) begin
+                         if(i_addr_ready & (r_i2c_load_data_contr==IDLE)) begin
+                              r_i2c_load_data_contr = LOAD_ADDR;
+                         end
+                         else if(r_i2c_load_data_contr==LOAD_ADDR & i_data_write_ready) begin
+                              r_i2c_load_data_contr = LOAD_REG;
+                              r_prev_contr = LOAD_ADDR;
+                         end
+                         else if((r_i2c_load_data_contr==LOAD_REG) || (r_i2c_load_data_contr==LOAD_DATA)) begin
+                              r_i2c_load_data_contr = CHANGE_VALID;
+                              if(r_prev_contr!=CHANGE_VALID) r_prev_contr = LOAD_REG;
+                         end
+                         else if(r_i2c_load_data_contr==CHANGE_VALID & i_data_write_ready & r_prev_contr==LOAD_REG) begin
+                              r_i2c_load_data_contr = LOAD_DATA;
+                              r_prev_contr = CHANGE_VALID;
+                         end
+                         else if(r_i2c_load_data_contr==CHANGE_VALID && r_prev_contr==CHANGE_VALID) begin
+                              r_i2c_load_data_contr = ANALYSE_DATA;
+                         end
+
+                         if(!i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin  
+                              r_state = CONFIGREAD;
+                              r_counterAck = 0;
+                              r_i2c_load_data_contr = IDLE;
+                         end
+                         
+                         if(i_nak & !r_prev_nak) begin
+                              r_state = CONFIGUWRITE;
+                              r_counterAck = r_counterAck + 1;
+                              r_i2c_load_data_contr = IDLE;
+                              r_prev_nak = i_nak; 
+                         end
+                         else if(!i_nak) begin
+                              r_prev_nak = i_nak;
+                         end
+
+                         if(r_counterAck >= 10 & i_addr_ready) begin
+                              r_state = NORESPOND;
+                         end
+
+                         if(r_counterConfig >= 10 & i_addr_ready) begin
+                              r_state = NORESPOND;
+                         end
+                    end
+
+                    CONFIGREAD: begin
+
+                         if(i_addr_ready & (r_i2c_load_data_contr==IDLE)) begin
                               r_i2c_load_data_contr = LOAD_ADDR;
                          end
                          else if(r_i2c_load_data_contr==LOAD_ADDR & i_data_write_ready) begin
@@ -283,48 +374,15 @@ always @(posedge i_clk or posedge i_rst)
                          else if(r_i2c_load_data_contr==LOAD_REG) begin
                               r_i2c_load_data_contr = CHANGE_VALID;
                          end
-                         else if(r_i2c_load_data_contr==CHANGE_VALID & i_data_write_ready) begin
-                              r_i2c_load_data_contr = LOAD_DATA;
-                         end
-
-                         if(i_nak & (r_i2c_load_data_contr==LOAD_DATA) & i_addr_ready) begin           
-                              r_state = CONFIGUWRITE;
-                              r_counterAck = r_counterAck + 1;
-                         end
-                         else if(!i_nak & (r_i2c_load_data_contr==LOAD_DATA) & i_addr_ready) begin  
-                              r_state = CONFIGREAD;
-                              r_counterAck = 0;
-                         end
-
-                         if(r_counterAck >= 10) begin
-                              r_state = NORESPOND;
-                         end
-
-                         if(r_counterConfig >= 10) begin
-                              r_state = NORESPOND;
-                         end
-                    end
-
-                    CONFIGREAD: begin
-
-                         if(i_addr_ready) begin
-                              r_i2c_load_data_contr = LOAD_ADDR;
-                         end
-                         else if(r_i2c_load_data_contr==LOAD_ADDR & i_data_write_ready) begin
-                              r_i2c_load_data_contr = LOAD_REG;
-                         end
-                         else if(r_i2c_load_data_contr==LOAD_REG & i_nbytes_ready) begin
+                         else if(r_i2c_load_data_contr==CHANGE_VALID & i_nbytes_ready) begin
                               r_i2c_load_data_contr = LOAD_NBYTES;
                          end
-                         else if(r_i2c_load_data_contr==LOAD_NBYTES) begin
+                         else if(r_i2c_load_data_contr==LOAD_NBYTES & i_data_read_valid) begin
                               r_i2c_load_data_contr = ANALYSE_DATA;
                          end
 
-                         if(i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin           
-                              r_state = CONFIGREAD;
-                              r_counterAck = r_counterAck + 1;
-                         end
-                         else if(!i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin  
+                         if(!i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin  
+                              r_i2c_load_data_contr = IDLE;
                               if(i_data_read_bits == CONFIG_REGISTER_DATA) begin
                                    r_state = READING;
                                    r_counterAck = 0;
@@ -335,12 +393,22 @@ always @(posedge i_clk or posedge i_rst)
                                    r_state = CONFIGUWRITE;
                               end
                          end
+                         
+                         if(i_nak & !r_prev_nak) begin
+                              r_state = CONFIGREAD;
+                              r_counterAck = r_counterAck + 1;
+                              r_i2c_load_data_contr = IDLE;
+                              r_prev_nak = i_nak; 
+                         end
+                         else if(!i_nak) begin
+                              r_prev_nak = i_nak;
+                         end
 
-                         if(r_counterAck >= 10) begin
+                         if(r_counterAck >= 10 & i_addr_ready) begin
                               r_state = NORESPOND;
                          end
 
-                         if(r_counterConfig >= 10) begin
+                         if(r_counterConfig >= 10 & i_addr_ready) begin
                               r_state = NORESPOND;
                          end
                          
@@ -348,30 +416,39 @@ always @(posedge i_clk or posedge i_rst)
 
                     READING: begin
 
-                         if(i_addr_ready) begin
+                         if(i_addr_ready & (r_i2c_load_data_contr==IDLE)) begin
                               r_i2c_load_data_contr = LOAD_ADDR;
                          end
                          else if(r_i2c_load_data_contr==LOAD_ADDR & i_data_write_ready) begin
                               r_i2c_load_data_contr = LOAD_REG;
                          end
-                         else if(r_i2c_load_data_contr==LOAD_REG & i_nbytes_ready) begin
+                         else if(r_i2c_load_data_contr==LOAD_REG) begin
+                              r_i2c_load_data_contr = CHANGE_VALID;
+                         end
+                         else if(r_i2c_load_data_contr==CHANGE_VALID & i_nbytes_ready) begin
                               r_i2c_load_data_contr = LOAD_NBYTES;
                          end
-                         else if(r_i2c_load_data_contr==LOAD_NBYTES) begin
+                         else if(r_i2c_load_data_contr==LOAD_NBYTES & i_data_read_valid) begin
                               r_i2c_load_data_contr = ANALYSE_DATA;
                          end
 
-                         if(i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin           
+                         if(!i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin  
+                              //Guardar en memoria la informacion
+                              r_counterAck = 0;
+                              r_i2c_load_data_contr = IDLE;
+                         end
+                         
+                         if(i_nak & !r_prev_nak) begin
                               r_state = READING;
                               r_counterAck = r_counterAck + 1;
+                              r_i2c_load_data_contr = IDLE;
+                              r_prev_nak = i_nak; 
                          end
-                         else if(!i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin  
-                              r_state = READING;
-                              r_counterAck = 0;
-                              r_counterConfig = 0;
+                         else if(!i_nak) begin
+                              r_prev_nak = i_nak;
                          end
 
-                         if(r_counterAck >= 10) begin
+                         if(r_counterAck >= 10 & i_addr_ready) begin
                               r_state = NORESPOND;
                          end
                     end

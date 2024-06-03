@@ -59,6 +59,9 @@ module i2c_master_oe #(
     //strict output lines
     output o_sda_out,
     output o_scl_out,
+
+    inout o_sda,
+    inout o_scl,
     
     output o_nak
 
@@ -124,10 +127,15 @@ assign o_data_ready = r_idata_ready;
 assign o_data_valid = r_odata_valid;
 assign o_nbytes_ready = r_nbytes_ready;
 
-assign o_sda_out = r_osda;
-assign o_scl_out = r_oscl;
-assign o_scl_oe = r_oe_scl;
-assign o_sda_oe = r_oe_sda;
+//assign o_sda_out = r_osda;
+//assign o_scl_out = r_oscl;
+//assign o_scl_oe = r_oe_scl;
+//assign o_sda_oe = r_oe_sda;
+
+assign o_sda_out = r_oe_sda;
+assign o_scl_out = r_oe_scl;
+assign o_scl_oe = r_oscl;
+assign o_sda_oe = r_osda;
 
 assign w_rw_flag = r_addr_latch[0];
 
@@ -192,6 +200,7 @@ always @(posedge i_clk or posedge i_rst) begin
                 r_addr_ready <= 1'b1;
                 r_idata_ready <= 1'b0;
                 r_nak <= 1'b0;
+                r_odata_valid <= 1'b0;              //Agregado
 
                 if (i_start == 1'b1 && i_addr_valid == 1'b1) begin
                     r_addr_latch = i_addr_bits;
@@ -296,7 +305,7 @@ always @(posedge i_clk or posedge i_rst) begin
 
                         2'd2: begin
                             if (i_scl_in == 1'b1) begin
-                                if (i_sda_in == 1'b1) begin
+                                if (/*i_sda_in*/o_sda_oe == 1'b1) begin
                                     //NAK
                                     r_nstate <= S_STOP;
                                     r_nak <= 1'b1;
@@ -489,7 +498,7 @@ always @(posedge i_clk or posedge i_rst) begin
                         2'd2: begin
                             //clk stretch
                             if (i_scl_in == 1'b1) begin
-                                r_odata_latch[r_bit_cntr] <= i_sda_in;
+                                r_odata_latch[r_bit_cntr] <= /*i_sda_in*/o_sda_oe;
                                 r_proc_cntr <= 2'd3;
                             end
                         end

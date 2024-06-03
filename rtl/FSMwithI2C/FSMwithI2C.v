@@ -1,5 +1,6 @@
 `include "../FSM/FSM.v"
 `include "../i2c_master/i2c_master_oe.v"   
+`include "../i2c_slave/i2c_slave.v"
 
 module FSMwithI2C #(
     parameter DATA_DEPTH = 8
@@ -101,7 +102,7 @@ i2c_master_oe i2c_master(
 
     //strict input lines
     .i_sda_in(i_sda),
-    .i_scl_in(i_scl),
+    .i_scl_in(o_scl_oe),
     
     //tristate buffers separate lines
     .o_sda_oe(o_sda_oe),
@@ -112,6 +113,12 @@ i2c_master_oe i2c_master(
     .o_scl_out(o_scl),
     
     .o_nak(w_nak)
+);
+
+i2c_slave i2c_slave(
+    .SCL(o_scl_oe),
+    .SDA(o_sda_oe),
+    .RST(i_rst)
 );
 
 
