@@ -57,6 +57,8 @@ reg [7:0]       output_shift;
 reg             output_control;
 reg [7:0]       index_pointer;
 
+reg r_aux;
+
 parameter [6:0] device_address = 7'h27;//4e<<1
 wire            start_rst = RST | start_resetter;//detect the START for one cycle
 wire            stop_rst = RST | stop_resetter;//detect the STOP for one cycle
@@ -65,7 +67,7 @@ wire            ack_bit = (bit_counter == 4'h8) && !start_detect;//the 9bites ac
 wire            address_detect = (input_shift[7:1] == device_address);//the input address match the slave
 wire            read_write_bit = input_shift[0];// the write or read operation 0=write and 1=read
 wire            write_strobe = (state == STATE_WRITE) && ack_bit;//write state and finish one byte=8bits
-assign          SDA = output_control ? 1'bz : 1'b0;
+assign          SDA = output_control ? ((r_aux) ? 1'b1 : 1'bz) : 1'b0;
 //---------------------------------------------
 //---------------detect the start--------------
 //---------------------------------------------
@@ -86,6 +88,7 @@ begin
                 input_shift <= 1'b0;
                 master_ack <= 1'b0;
                 output_shift <= 0;
+                r_aux <= 0;
         end
         else
                 start_resetter <= start_detect;
@@ -258,14 +261,17 @@ always @ (posedge RST or negedge SCL)
 begin   
         if (RST)
                 output_control <= 1'b1;
-        else if (start_detect)
+        else if (start_detect) begin
                 output_control <= 1'b1;
+                r_aux <= 1'b0;
+        end
         else if (lsb_bit)
         begin   
                 output_control <=
                     !(((state == STATE_DEV_ADDR) && address_detect) ||
                       (state == STATE_IDX_PTR) ||
-                      (state == STATE_WRITE)); 
+                      (state == STATE_WRITE));
+                r_aux <= 1'b0; 
                 //when operation is wirte 
                 //addr match gen ACK,the index get gen ACK,and write data gen ACK
         end
@@ -275,16 +281,24 @@ begin
                 // transfer, if applicable.
                 if (((state == STATE_READ) && master_ack) ||
                     ((state == STATE_DEV_ADDR) &&
-                        address_detect && read_write_bit))
+                        address_detect && read_write_bit)) begin
                         output_control <= output_shift[7];
+                        r_aux <= 1'b1;
                         //for the RESTART and send the addr ACK for 1'b0
                         //for the read and master ack both slave is pull down
-                else
+                end
+                else begin
                         output_control <= 1'b1;
+                        r_aux <= 1'b0;
+                end
         end
-        else if (state == STATE_READ)//for read send output shift to SDA
+        else if (state == STATE_READ) begin//for read send output shift to SDA
                 output_control <= output_shift[7];
-        else
+                r_aux <= 1'b1;
+        end
+        else begin
                 output_control <= 1'b1;
+                r_aux <= 1'b0;
+        end
 end
 endmodule

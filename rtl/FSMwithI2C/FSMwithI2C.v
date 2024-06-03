@@ -102,7 +102,7 @@ i2c_master_oe i2c_master(
 
     //strict input lines
     .i_sda_in(i_sda),
-    .i_scl_in(o_scl_oe),
+    .i_scl_in(o_scl),
     
     //tristate buffers separate lines
     .o_sda_oe(o_sda_oe),
@@ -116,8 +116,8 @@ i2c_master_oe i2c_master(
 );
 
 i2c_slave i2c_slave(
-    .SCL(o_scl_oe),
-    .SDA(o_sda_oe),
+    .SCL(o_scl),
+    .SDA(o_sda),
     .RST(i_rst)
 );
 
