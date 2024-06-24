@@ -1,6 +1,6 @@
 module FSM #(
      parameter DATA_DEPTH = 8,
-     parameter NBYTES = 0,         //El i2c_master empeiza a contar desde el cero (0=leer una vez)
+     parameter NBYTES = 0,                        //El i2c_master empeiza a contar desde el cero (0=leer una vez)
      parameter ADDR_SLAVE_READ = 79,
      parameter ADDR_SLAVE_WRITE = 78,
      parameter CONFIG_REGISTER_WRITE = 3,         //A modo de prueba se cambio el valor para que sea el mismo y se pueda comprobar

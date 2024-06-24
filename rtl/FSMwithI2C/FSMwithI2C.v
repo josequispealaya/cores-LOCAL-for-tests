@@ -1,6 +1,5 @@
 `include "../FSM/FSM.v"
 `include "../i2c_master/i2c_master_oe.v"   
-`include "../i2c_slave/i2c_slave.v"
 
 module FSMwithI2C #(
     parameter DATA_DEPTH = 8
@@ -8,14 +7,13 @@ module FSMwithI2C #(
     input i_clk,
     input i_rst,
 
-    input i_sda,
-    input i_scl,
+    input [2:0] state_tb,
+    input [1:0] start,
+    input [1:0] stop,
+    input [7:0] index,
 
-    output o_sda_oe,
-    output o_scl_oe,
-
-    output o_sda,
-    output o_scl
+    inout sda,
+    inout scl
 );
 
 wire w_start;
@@ -39,7 +37,24 @@ wire w_data_write_ready;
 wire [DATA_DEPTH-1:0] w_data_write_bits;
 wire w_data_write_valid;
 
+//Input Output interface
+wire w_sda_oe;
+wire w_sda_o;
+wire w_sda_i;
+
+//Input output interface
+reg r_sda_i;
+reg r_scl;
+reg r_sda_o;
+reg r_sda_oe;
+reg r_scl_oe;
+
 wire w_nak;
+
+//Registers
+reg r_prev_val;
+reg r_in_out_sda;
+reg r_sda;
 
 FSM fsm(
     .i_clk(i_clk), 
@@ -101,25 +116,21 @@ i2c_master_oe i2c_master(
     //of io ports
 
     //strict input lines
-    .i_sda_in(i_sda),
-    .i_scl_in(o_scl),
+    .i_sda_in(w_sda_i),
+    .i_scl_in(scl),
     
     //tristate buffers separate lines
-    .o_sda_oe(o_sda_oe),
-    .o_scl_oe(o_scl_oe),
+    .o_sda_oe(w_sda_oe),
+    .o_scl_oe(r_scl_oe),
 
     //strict output lines
-    .o_sda_out(o_sda),
-    .o_scl_out(o_scl),
+    .o_sda_out(w_sda_o),
+    .o_scl_out(scl),
     
     .o_nak(w_nak)
 );
 
-i2c_slave i2c_slave(
-    .SCL(o_scl),
-    .SDA(o_sda),
-    .RST(i_rst)
-);
-
+assign sda = w_sda_oe ? w_sda_o : 1'bz;
+assign w_sda_i = sda;
 
 endmodule
