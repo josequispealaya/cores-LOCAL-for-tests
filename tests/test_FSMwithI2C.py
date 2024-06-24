@@ -40,7 +40,8 @@ stop = 1
 
 #OTRAS VARIABLES
 #------------------------------------------------------------------------
-CONFIG_REGISTER_WRITE = "00001001"        #0x09
+REGISTER_POINTER_CONFIG_SLAVE = "00001001"        #0x09
+REGISTER_CONFIG_DATA_SLAVE = "00001000"           #0x04
 ADDR_VECTOR = "01001110"                  #0x4e
 data_write_vector = []
 #------------------------------------------------------------------------
@@ -163,6 +164,8 @@ def i2c_slave(dut,scl,sda):
             register_pointer=0
             error=0
 
+        verification()
+
     elif(state==WRITE):
         if(index_data>=0):
             data_write_vector.append(sda)
@@ -186,6 +189,31 @@ def i2c_slave(dut,scl,sda):
 
     scl_prev_value=scl
     sda_prev_value=sda
+
+def verification():
+    global index_check_addr
+    global gen_ack_nack
+    global bit_RW
+    global index_data
+    global data_write_vector
+    global register_pointer
+    global error
+    global ADDR_VECTOR 
+    global index_registers
+    global state     
+    global registers
+    global scl_prev_value
+    global sda_prev_value
+    global start
+    global stop
+
+    if(gen_ack_nack==2):
+        assert error, "Wrong ADDR slave"
+    elif(gen_ack_nack==3):
+        assert (register_pointer!=int(REGISTER_POINTER_CONFIG_SLAVE,2)), "Wrong register pointer"
+    elif(gen_ack_nack==5):
+        assert (registers[register_pointer]!=int(REGISTER_CONFIG_DATA_SLAVE,2)), "Wrong register information"
+
 
 @cocotb.test()
 async def test_FSMwithI2C(dut):  

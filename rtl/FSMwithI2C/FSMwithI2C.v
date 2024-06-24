@@ -8,15 +8,13 @@ module FSMwithI2C #(
     input i_rst,
 
     input [2:0] state_tb,
-    input [1:0] start,
-    input [1:0] stop,
-    input [7:0] index,
 
     inout sda,
     inout scl
 );
 
 wire w_start;
+wire w_nak;
 
 wire w_addr_ready;
 wire [DATA_DEPTH-1:0] w_addr_bits; 
@@ -43,13 +41,7 @@ wire w_sda_o;
 wire w_sda_i;
 
 //Input output interface
-reg r_sda_i;
-reg r_scl;
-reg r_sda_o;
-reg r_sda_oe;
 reg r_scl_oe;
-
-wire w_nak;
 
 //Registers
 reg r_prev_val;
