@@ -105,35 +105,29 @@ def test_simple_dff_runner():
 
     proj_path = Path(__file__).resolve().parent.parent
 
-    sources = []
+    sim_build_path = os.path.join(proj_path, "sim_build")
 
     # create directory for simulated waveform
-    try:
-        os.mkdir(os.path.join(proj_path, "sim_build"))
-    except FileExistsError:
+    if not os.path.exists(sim_build_path):
+        os.mkdir(sim_build_path)
+    else:
         print("Not pre-creating sim_build directory because it exists")
-
-    # create command file to establish iverilog timesteps
-    # cocotb defaults to timescale 1ns, timeprecision 1ps
-    cmdfile_path = os.path.join(proj_path, "sim_build", "icarus_cmd.f")
-    # 2cmdfile_path = os.path.join(proj_path, "sim_build", "cores/tests/sim_build/icarus_cmd.f")
-    cmdfile = open(cmdfile_path, "w")
-    cmdfile.write(f"+timescale+{COCOTB_HDL_TIMEUNIT}/{COCOTB_HDL_TIMEPRECISION})\n")
-    cmdfile.close()
-
-    #create extra verilog file to enable waveforms
-    #same as done in Makefile.icarus from cocotb repo
     
-    # 01 wavever_path = os.path.join(proj_path, "sim_build", "cores/tests/sim_build/cocotb_icarus_dump.v")
-    wavever_path = os.path.join(proj_path, "sim_build", "cocotb_icarus_dump.v")
-    waveverfile = open(wavever_path, "w")
-    waveverfile.write("module cocotb_icarus_dump();\n")
-    waveverfile.write("initial begin\n")
-    waveverfile.write(f"$dumpfile(\"{proj_path}/sim_build/waveform.vcd\");\n")
-    waveverfile.write(f"$dumpvars(0, {DUT});\n")
-    waveverfile.write("end\n")
-    waveverfile.write("endmodule\n")
-    waveverfile.close()
+    cmdfile_path = os.path.join(sim_build_path, "icarus_cmd.f")
+    with open(cmdfile_path, "w") as cmdfile:
+        cmdfile.write(f"+timescale+{COCOTB_HDL_TIMEUNIT}/{COCOTB_HDL_TIMEPRECISION})\n")
+
+    wavever_path = os.path.join(sim_build_path, "cocotb_icarus_dump.v")
+    with open(wavever_path, "w") as waveverfile:
+        waveverfile.write("module cocotb_icarus_dump();\n")
+        waveverfile.write("initial begin\n")
+        waveverfile.write(f"$dumpfile(\"{sim_build_path}/waveform.vcd\");\n")
+        waveverfile.write(f"$dumpvars(0, {DUT});\n")
+        waveverfile.write("end\n")
+        waveverfile.write("endmodule\n")
+    
+    
+    sources = []
 
     #locate all verilog sources
     for path, subdirs, files in os.walk(proj_path):
@@ -144,13 +138,12 @@ def test_simple_dff_runner():
         for name in files:
             if name.endswith("uart_clkgen.v") or name.endswith("uart_rx.v") or name.endswith("uart_tx.v"):
                 sourcePath = os.path.join(path, name)
-                print("Adding source: " + sourcePath)
-                # 3 sources.append(os.path.relpath(sourcePath, proj_path))
-                sources.append(os.path.relpath(sourcePath, os.path.join(proj_path, "cores")))
+                print(f"Adding source: {sourcePath}")
+                sources.append(sourcePath)
 
     #include verilog to dump waveforms
-    sources.append(os.path.join("./", "sim_build", "cocotb_icarus_dump.v"))
-
+    sources.append(wavever_path)
+    
     runner = get_runner(sim)()
     runner.build(
         verilog_sources=sources,
@@ -167,26 +160,23 @@ def test_simple_dff_runner():
     except Exception as e:
         print(f"Error during simulation: {str(e)}")
         sys.exit(1)
-   
-  
-    if (sys.argv[1] == "--wave"):
+     
+    if len(sys.argv) > 1 and sys.argv[1] == "--wave":
         print("Calling gtkwave to view waveform...\n")
-        # 4 .wavefile = os.path.join(proj_path, "sim_build", "waveform.vcd")
-        wavefile = os.path.join(proj_path, "sim_build", "cores/tests/sim_build/waveform.vcd")
+       
+        wavefile = os.path.join(proj_path, "waveform.vcd")
         if (os.path.exists(wavefile)):
-            # 5 prog = ["gtkwave", str(os.path.relpath(wavefile, proj_path))]
-            prog = ["gtkwave", str(os.path.relpath(wavefile, os.path.join(proj_path, "cores")))]
+            prog = ["gtkwave", str(wavefile)]
             subprocess.run(prog)
-    
-    
+       
     # Verificar que el programa se ejecute correctamente
-    if sys.argv[1] != "--wave":
+    if len(sys.argv) == 1 or sys.argv[1] != "--wave":
         print("Simulation completed successfully.")
     else:
         print("Waveform visualization completed successfully.")
     
     # Verificar que las operaciones se ejecuten correctamente
-    if os.path.exists(os.path.join(proj_path, "sim_build", "waveform.vcd")):
+    if os.path.exists(os.path.join(proj_path, "waveform.vcd")):
         print("Waveform file exists.")
     else:
         print("Error: Waveform file does not exist.")    
