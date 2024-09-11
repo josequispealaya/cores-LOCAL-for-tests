@@ -2,17 +2,30 @@ name: CoresTest #Nombre del workflow
 
 on: push #Accion con la que se activa, en este caso con un push en cualquier branch
 
-jobs: #Son los trabajos que realizara, en este caso de forma secuencial
+jobs: #Son los trabajos que realizará, en este caso de forma secuencial
   Test:
     runs-on: ubuntu-latest #OS que usará la vm de github para correr el workflow
     steps: #pasos del workflow
-    - uses: actions/checkout@v4 #Es una accion propia de actions, lo que hace es traer la ultima version de tu rama
+    - uses: actions/checkout@v4 #Es una accion propia de actions, lo que hace es traer la última version de tu rama
 
-#    - name: Build Image #Nombre de este step
-#      run: make build-docker #Comando que va a ejecutar
+    - name: Configurar mensaje de éxito
+      run: echo "success_message=¡Todos los tests han pasado exitosamente!" >> $GITHUB_ENV
+
+    - name: Configurar mensaje de fallo
+      run: echo "failure_message=⚠️ ¡Error en algún tests! Revisa los detalles del test fallido." >> $GITHUB_ENV
+
 
     - name: Docker Login
       run: docker login --username utn-ba-sats --password ${{ secrets.GITHUB_TOKEN }} ghrc.io
 
-    - name: Test cores
-      run: make test 
+
+    - name: Ejecutar todos los tests
+      run: ./run_tests_pipeline.sh # Ejecutar el script que corre todos los tests
+
+    - name: Mostrar resultado de los tests
+      if: failure() # Solo se ejecuta si falla algún test
+      run: echo "${{ env.failure_message }}"  # Mostrar el mensaje de error
+
+    - name: Mostrar éxito de los tests
+      if: success() # Solo se ejecuta si todos los tests pasan exitósamente.
+      run: echo "${{ env.success_message }}"  # Mostrar el mensaje de éxito   

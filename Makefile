@@ -35,7 +35,7 @@ dockershell:  ## Run the development container
 
 
 test:  ## Run all tests or the ones for specific module setting DUT variable
-	@$(call run_in_container, ./run_cocotb_tests.sh ${DUT})
+	@$(call run_in_container, ./run_cocotb_tests.sh ${DUT} || exit 1)
 
 
 waves:  ## Run gtkwave with last test waves from DUT variable
