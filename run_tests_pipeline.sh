@@ -9,7 +9,7 @@ for TEST_FILE in $TEST_FILES; do
 
     echo "Ejecutando test: $TEST_NAME"
     
-    # Ejecutar el test específico usando el script que ya tienes
+    # Ejecutar el test específico usando el script que ya se tiene
     ./run_cocotb_tests.sh $TEST_NAME
 
     # Verificar si el test falló
