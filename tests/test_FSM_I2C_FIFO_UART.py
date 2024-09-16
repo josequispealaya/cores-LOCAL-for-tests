@@ -1,9 +1,11 @@
-"""Finite state machine (FSM) with i2c_master_oe"""
+"""Finite state machine (FSM) with i2c_master_oe and FIFO"""
 
 import cocotb
 import random
 
 from cocotb.triggers import Timer
+from cocotb.triggers import RisingEdge
+from cocotb.triggers import FallingEdge
 import cocotb.types
 
 #VARIABLES GLOBALES
@@ -11,7 +13,7 @@ import cocotb.types
 
 #REGISTROS
 #------------------------------------------------------------------------
-none = ['0','1','0','1','0','1','0','1']
+none = ['0','1','1','1','0','1','1','0']
 registers = [none,none,none,none,none,none,none,none,none]
 #------------------------------------------------------------------------
 
@@ -40,28 +42,50 @@ stop = 1
 
 #OTRAS VARIABLES
 #------------------------------------------------------------------------
-REGISTER_POINTER_CONFIG_SLAVE = "00001001"        #0x09
-REGISTER_CONFIG_DATA_SLAVE = "00001000"           #0x04
-ADDR_VECTOR = "01001110"                  #0x4e
+REGISTER_POINTER_CONFIG_SLAVE = "00001001"        # 0x09
+REGISTER_CONFIG_DATA_SLAVE = "00001000"           # 0x04
+ADDR_VECTOR = "01001110"                          # 0x4e
 data_write_vector = []
+UART_MESSAGE = "10100101"                         # A5 para obtener los datos del sensor                
+UART_DIVIDER_NUMBER = 176                         # 16 x CANT_BITS (8 de datos, 1 de start, 1 de stop y 1 de paridad)
 #------------------------------------------------------------------------
 
-#ESTADOS
+#ESTADOS I2C SLAVE
 #------------------------------------------------------------------------
 IDLE = 0
 CHECK_ADDR = 1
 ACK_NACK=2
-WRITE=3             # Escribir en el registro
-READ=4              # Leer el registro
+WRITE=3                                           # Escribir en el registro
+READ=4                                            # Leer el registro
 WAIT_ACK_NACK=5
 #------------------------------------------------------------------------
 
+#VARIABLES UART
+#------------------------------------------------------------------------
 state = IDLE
+clk = 0
+uart_state = IDLE
+uart_counter = UART_DIVIDER_NUMBER
+uart_message_index = 0
+CANT_PEDIDOS_INFO_SENSOR = 31                      # Cantidad de veces que se quiere pedir informacion
+uart_contador_pedidos = CANT_PEDIDOS_INFO_SENSOR - 1
+#------------------------------------------------------------------------
+
+#ESTADOS UART
+#------------------------------------------------------------------------
+UART_START = 1
+UART_SEND_MESSAGE=2
+UART_STOP=3
+UART_DIVIDER=4
+#------------------------------------------------------------------------
 
 async def clock(dut):
+    global clk
     dut.i_clk.value = 0
+    clk = 0
     while True:
         dut.i_clk.value = not dut.i_clk.value
+        clk = dut.i_clk.value
         await Timer(10,'us')
 
 def i2c_slave(dut,scl,sda):
@@ -80,11 +104,6 @@ def i2c_slave(dut,scl,sda):
     global sda_prev_value
     global start
     global stop
-
-    dut.state_tb.value=state
-    dut.start.value=start
-    dut.stop.value=stop
-    dut.index.value=index_registers
 
     if(scl_prev_value=='1' and scl=='1' and sda=='1' and sda_prev_value=='0' and state!=READ): 
             start=0
@@ -214,15 +233,48 @@ def verification():
     elif(gen_ack_nack==5):
         assert (registers[register_pointer]!=int(REGISTER_CONFIG_DATA_SLAVE,2)), "Wrong register information"
 
+def uart_reader(dut):
+
+    global uart_state
+    global uart_counter
+    global uart_message_index
+
+    if(uart_state==UART_START):
+        dut.i_rx.value = 0        #Start
+        uart_state = UART_DIVIDER
+        uart_counter = UART_DIVIDER_NUMBER
+    elif(uart_state==UART_SEND_MESSAGE):
+        dut.i_rx.value = int(UART_MESSAGE[uart_message_index],2)
+        uart_message_index=uart_message_index+1
+
+        uart_state = UART_DIVIDER
+        uart_counter = UART_DIVIDER_NUMBER
+
+    elif(uart_state==UART_DIVIDER):
+        uart_counter=uart_counter-1
+        if(uart_counter<=0):
+            if(uart_message_index>=8):
+                uart_message_index = 0
+                uart_state = UART_STOP
+            else:
+                uart_state = UART_SEND_MESSAGE
+    elif(uart_state==UART_STOP):
+        dut.i_rx.value = 1        #Stop
+        uart_state = IDLE
+    
 
 @cocotb.test()
-async def test_FSMwithI2C(dut):  
+async def test_FSM_I2C_FIFO_UART(dut):  
+
+    global uart_state
+    global uart_contador_pedidos
 
     scl = dut.scl.value.binstr
     sda = dut.sda.value.binstr
     clk_prev_value = dut.i_clk.value.binstr
+    dut.i_rx.value = 1
 
-    contador=100000    
+    contador=50000    
 
     cocotb.start_soon(clock(dut))
 
@@ -234,13 +286,20 @@ async def test_FSMwithI2C(dut):
 
     while contador>0:
 
-        clk=dut.i_clk.value.binstr
         scl = dut.scl.value.binstr
         sda = dut.sda.value.binstr
 
-        if(clk=='1' and clk_prev_value=='0'): i2c_slave(dut,scl,sda)        #Positive edge del clk
+        await RisingEdge(dut.i_clk)
+
+        i2c_slave(dut,scl,sda)
+
+        if(contador<25000):
+            uart_reader(dut)
+        elif(contador==25000):
+            uart_state=UART_START
+
+        if(uart_contador_pedidos>0 and contador>=0 and contador < 5):
+            uart_contador_pedidos=uart_contador_pedidos-1
+            contador=25002
 
         contador = contador - 1
-        clk_prev_value=clk
-
-        await Timer(10, 'us')

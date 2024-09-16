@@ -1,6 +1,6 @@
 module FSM #(
      parameter DATA_DEPTH = 8,
-     parameter NBYTES = 0,                        //El i2c_master empeiza a contar desde el cero (0=leer una vez)
+     parameter NBYTES = 0,                        //El i2c_master empieza a contar desde el cero (0=leer una vez)
      parameter ADDR_SLAVE_READ = 79,
      parameter ADDR_SLAVE_WRITE = 78,
      parameter CONFIG_REGISTER_WRITE = 3,         //A modo de prueba se cambio el valor para que sea el mismo y se pueda comprobar
@@ -34,8 +34,15 @@ module FSM #(
      output reg [DATA_DEPTH-1:0] o_data_write_bits,
      output reg o_data_write_valid,
 
-     input i_nak
+     input i_nak,
 
+     //FIFO
+
+     input i_ready_in,
+     output reg [DATA_DEPTH-1:0] o_data_in,
+     output reg o_data_in_valid,
+
+     input i_fifo_full
 );
 
 //Registro para los estados
@@ -62,7 +69,8 @@ localparam  LOAD_ADDR =      'd0,
             LOAD_REG =       'd3,
             LOAD_DATA =      'd4,
             CHANGE_VALID =   'd5,
-            IDLE =           'd6
+            SAVE_DATA =      'd6,
+            IDLE =           'd7
 ;
 
 parameter NONE=0;
@@ -219,6 +227,16 @@ always @(r_state or r_i2c_load_data_contr)
                               o_nbytes_valid = 0;
                               o_data_write_bits = NONE; 
                               o_data_write_valid = 0;
+                              if(i_fifo_full) begin
+                                   o_data_in_valid = 0;          //*****
+                              end
+                              else begin
+                                   o_data_in_valid = 1;          //*****
+                              end
+                              
+                         end
+                         SAVE_DATA: begin
+                              o_data_in = i_data_read_bits; //*****
                          end
                          IDLE: begin
                               o_addr_bits = NONE;
@@ -227,6 +245,8 @@ always @(r_state or r_i2c_load_data_contr)
                               o_nbytes_valid = 0;
                               o_data_write_bits = NONE; 
                               o_data_write_valid = 0;
+                              o_data_in = NONE;
+                              o_data_in_valid = 0;
                          end
                     endcase
                end
@@ -249,6 +269,8 @@ always @(r_state or r_i2c_load_data_contr)
                     o_data_read_ready = 0;
                     o_data_write_bits = NONE;
                     o_data_write_valid = 0;
+                    o_data_in = NONE;
+                    o_data_in_valid = 0;
                end
                default: begin
                     o_start = 0;
@@ -259,6 +281,8 @@ always @(r_state or r_i2c_load_data_contr)
                     o_data_read_ready = 0;
                     o_data_write_bits = NONE;
                     o_data_write_valid = 0;
+                    o_data_in = NONE;
+                    o_data_in_valid = 0;
                end
           endcase
      end
@@ -429,11 +453,13 @@ always @(posedge i_clk or posedge i_rst)
                               r_i2c_load_data_contr = LOAD_NBYTES;
                          end
                          else if(r_i2c_load_data_contr==LOAD_NBYTES & i_data_read_valid) begin
+                              r_i2c_load_data_contr = SAVE_DATA;
+                         end
+                         else if(r_i2c_load_data_contr==SAVE_DATA & (i_ready_in | i_fifo_full)) begin
                               r_i2c_load_data_contr = ANALYSE_DATA;
                          end
 
                          if(!i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin  
-                              //Guardar en memoria la informacion
                               r_counterAck = 0;
                               r_i2c_load_data_contr = IDLE;
                          end
