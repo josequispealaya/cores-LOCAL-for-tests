@@ -6,7 +6,8 @@ module FSM #(
      parameter CONFIG_REGISTER_WRITE = 3,         //A modo de prueba se cambio el valor para que sea el mismo y se pueda comprobar
      parameter CONFIG_REGISTER_READ = 3,          //el valor real del sensor de temperatura es 0x09 para escribir y 0x03 para leer
      parameter CONFIG_REGISTER_DATA = 4,
-     parameter SENSOR_DATA = 0
+     parameter SENSOR_DATA = 0,
+     parameter SENSOR_DECIMAL_FRACTION_DATA = 15
 )(
      input i_clk, 
      input i_rst,
@@ -42,7 +43,8 @@ module FSM #(
      output reg [DATA_DEPTH-1:0] o_data_in,
      output reg o_data_in_valid,
 
-     input i_fifo_full
+     input i_fifo_full,
+     output reg o_err
 );
 
 //Registro para los estados
@@ -56,6 +58,7 @@ reg [2:0] r_i2c_load_data_contr;
 //Otros registros
 reg r_prev_nak;
 reg [2:0] r_prev_contr;
+reg r_get_decimal_fraction;
 
 //Estados
 parameter ADDR=0, CONFIGUWRITE=1, CONFIGREAD=2, READING=3, NORESPOND=4, RESET=5;
@@ -207,7 +210,12 @@ always @(r_state or r_i2c_load_data_contr)
                          end
                          LOAD_REG: begin
                               o_start = 0;                       //Para generar un pulso del start ya que a este estado ingreso luego de LOAD_ADDR
-                              o_data_write_bits = SENSOR_DATA; 
+                              if(!r_get_decimal_fraction) begin
+                                   o_data_write_bits = SENSOR_DATA;
+                              end
+                              else begin
+                                   o_data_write_bits = SENSOR_DECIMAL_FRACTION_DATA;
+                              end
                               o_data_write_valid = 1;
                          end
                          CHANGE_VALID: begin
@@ -259,6 +267,7 @@ always @(r_state or r_i2c_load_data_contr)
                     o_data_read_ready = 0;
                     o_data_write_bits = NONE;
                     o_data_write_valid = 0;
+                    o_err = 1;
                end
                RESET: begin
                     o_start = 0;
@@ -271,6 +280,7 @@ always @(r_state or r_i2c_load_data_contr)
                     o_data_write_valid = 0;
                     o_data_in = NONE;
                     o_data_in_valid = 0;
+                    o_err = 0;
                end
                default: begin
                     o_start = 0;
@@ -298,6 +308,7 @@ always @(posedge i_clk or posedge i_rst)
                r_i2c_load_data_contr = IDLE;
                r_prev_nak = 0;
                r_prev_contr = IDLE;
+               r_get_decimal_fraction = 1'b0;
           end
           else begin
                case (r_state)
@@ -462,6 +473,7 @@ always @(posedge i_clk or posedge i_rst)
                          if(!i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin  
                               r_counterAck = 0;
                               r_i2c_load_data_contr = IDLE;
+                              r_get_decimal_fraction = ~r_get_decimal_fraction;
                          end
                          
                          if(i_nak & !r_prev_nak) begin

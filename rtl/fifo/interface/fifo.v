@@ -11,7 +11,8 @@ module FIFO
     output reg [WORD_LENGTH - 1 : 0] o_data_out,
     output reg o_data_out_valid,
     output reg o_ready_in,
-    output o_full
+    output o_full,
+    output o_empty
 );
 
 reg r_read_en;
@@ -48,6 +49,7 @@ FIFO_internal #(ADDR_LENGTH, WORD_LENGTH) fifo_internal (
 );
 
 assign o_full = w_full;
+assign o_empty = w_empty;
 
 always @(*) begin
 // Input handshake next state logic

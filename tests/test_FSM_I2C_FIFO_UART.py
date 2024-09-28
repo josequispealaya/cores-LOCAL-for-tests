@@ -46,8 +46,8 @@ REGISTER_POINTER_CONFIG_SLAVE = "00001001"        # 0x09
 REGISTER_CONFIG_DATA_SLAVE = "00001000"           # 0x04
 ADDR_VECTOR = "01001110"                          # 0x4e
 data_write_vector = []
-UART_MESSAGE = "10100101"                         # A5 para obtener los datos del sensor                
-UART_DIVIDER_NUMBER = 176                         # 16 x CANT_BITS (8 de datos, 1 de start, 1 de stop y 1 de paridad)
+UART_MESSAGE = "11110010"#"11110010" y "01000000" # 79 para obtener los datos del sensor y 2 para solo resetear la FSM             
+UART_DIVIDER_NUMBER = 226                         # (Clock/Baudrate)
 #------------------------------------------------------------------------
 
 #ESTADOS I2C SLAVE
@@ -67,7 +67,7 @@ clk = 0
 uart_state = IDLE
 uart_counter = UART_DIVIDER_NUMBER
 uart_message_index = 0
-CANT_PEDIDOS_INFO_SENSOR = 31                      # Cantidad de veces que se quiere pedir informacion
+CANT_PEDIDOS_INFO_SENSOR = 1                      # Cantidad de veces que se quiere pedir informacion
 uart_contador_pedidos = CANT_PEDIDOS_INFO_SENSOR - 1
 #------------------------------------------------------------------------
 
@@ -86,7 +86,7 @@ async def clock(dut):
     while True:
         dut.i_clk.value = not dut.i_clk.value
         clk = dut.i_clk.value
-        await Timer(10,'us')
+        await Timer(19,'ns')
 
 def i2c_slave(dut,scl,sda):
     global index_check_addr
@@ -274,7 +274,7 @@ async def test_FSM_I2C_FIFO_UART(dut):
     clk_prev_value = dut.i_clk.value.binstr
     dut.i_rx.value = 1
 
-    contador=50000    
+    contador=150000    
 
     cocotb.start_soon(clock(dut))
 
@@ -300,6 +300,6 @@ async def test_FSM_I2C_FIFO_UART(dut):
 
         if(uart_contador_pedidos>0 and contador>=0 and contador < 5):
             uart_contador_pedidos=uart_contador_pedidos-1
-            contador=25002
+            contador=50002
 
         contador = contador - 1

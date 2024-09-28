@@ -33,8 +33,8 @@ RAM_DUALPORT #(ADDR_LENGTH, WORD_LENGTH) memory (
     .r_clk(i_clk),
     .w_clk(i_clk),
     .w_write_en(w_aux_write_en),
-    .w_addr(w_addr),
-    .r_addr(r_addr),
+    .i_write_addr(w_addr),
+    .i_read_addr(r_addr),
     .w_data_in(i_data_in),
     .r_data_out(o_data_out)
 );

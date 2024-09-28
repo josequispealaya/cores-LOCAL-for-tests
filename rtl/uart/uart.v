@@ -7,15 +7,15 @@ module uart #(
     input [DIV_BITS-1:0] i_div,
 
     input i_rxd,
-    output o_txd,
+    output reg o_txd,
 
-    output [8-1:0] o_data,              //Output data
-    output o_valid,                     //Finish output process
-    input i_ready,                      //Ready to recieve
+    output [8-1:0] o_data,
+    output o_valid,
+    input i_ready,
 
-    input [8-1:0] i_data,               //Input data
-    input i_valid,                      //Finish input process
-    output o_ready,                     //Ready to send
+    input [8-1:0] i_data,
+    input i_valid,
+    output o_ready,
 
     output o_rxerr
 
@@ -47,7 +47,7 @@ uart_rx inst_rx (
 
     .i_rxpulse(w_rxpulse),   
     
-    .o_err(o_err),
+    .o_err(o_rxerr),
     .o_rxsync(w_rxsync)
 );
 

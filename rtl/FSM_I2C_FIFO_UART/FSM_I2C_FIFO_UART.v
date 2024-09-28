@@ -9,20 +9,51 @@
 `include "../uart/uart_clkgen.v"
 
 module FSM_I2C_FIFO_UART #(
-    parameter DATA_DEPTH = 8, DIV_BITS = 10, DIV_CLK_NUMBER=10, SEND_SENSOR_DATA = 165
+    parameter DATA_DEPTH = 8, 
+    DIV_BITS = 16, 
+    DIV_CLK_NUMBER=170, 
+    SEND_SENSOR_DATA = 60, 
+    RESET_FSM = 126,
+    NBYTES = 0,                        //El i2c_master empieza a contar desde el cero (0=leer una vez)
+    ADDR_SLAVE_READ = 79,
+    ADDR_SLAVE_WRITE = 78,
+    CONFIG_REGISTER_WRITE = 3,         //A modo de prueba se cambio el valor para que sea el mismo y se pueda comprobar
+    CONFIG_REGISTER_READ = 3,          //el valor real del sensor de temperatura es 0x09 para escribir y 0x03 para leer
+    CONFIG_REGISTER_DATA = 4,
+    SENSOR_DATA = 0,
+    ADDR_LENGTH = 8,
+    //i2c master
+    CLK_DIV = 16,
+    CLK_DIV_REG_BITS = 24
 )(
     input i_clk,
     input i_rst,
 
     input i_rx,
-    output o_tx,
+    output reg o_tx,
 
-    inout sda,
+    output reg o_led_status,    //Para verificar que la FPGA siga funcionando
+    output reg o_led_uart_err,
+    output reg o_led_fsm_err,
+    output o_led_fifo_empty,
+
+    inout sda,            //Para simulacion hay assign comentados mas abajo)
     inout scl
 );
 
+//--------------------------------------------------------------------------------------------
+//FSM and I2C master
+//--------------------------------------------------------------------------------------------
+
+//-------------------
+//Wires and registers
+//-------------------
+
 wire w_start;
 wire w_nak;
+wire w_err;
+wire w_fsm_rst;
+reg r_fsm_rst = 0;
 
 wire w_addr_ready;
 wire [DATA_DEPTH-1:0] w_addr_bits; 
@@ -49,7 +80,9 @@ wire w_sda_o;
 wire w_sda_i;
 
 //Input output interface
-reg r_scl_oe;
+wire w_scl_oe;
+wire w_scl_o;
+wire w_scl_i;
 
 //Registers
 reg r_prev_val;
@@ -58,10 +91,25 @@ reg r_sda;
 
 //FSM fifo interface
 wire w_fifo_full;
+wire w_fifo_empty;
 
-FSM fsm(
+//-------------------
+//Modules
+//-------------------
+
+FSM #(
+    .DATA_DEPTH(DATA_DEPTH),
+    .NBYTES(NBYTES),                        //El i2c_master empieza a contar desde el cero (0=leer una vez)
+    .ADDR_SLAVE_READ(ADDR_SLAVE_READ),
+    .ADDR_SLAVE_WRITE(ADDR_SLAVE_WRITE),
+    .CONFIG_REGISTER_WRITE(CONFIG_REGISTER_WRITE),         //A modo de prueba se cambio el valor para que sea el mismo y se pueda comprobar
+    .CONFIG_REGISTER_READ(CONFIG_REGISTER_READ),          //el valor real del sensor de temperatura es 0x09 para escribir y 0x03 para leer
+    .CONFIG_REGISTER_DATA(CONFIG_REGISTER_DATA),
+    .SENSOR_DATA(SENSOR_DATA)
+    ) 
+    fsm(
     .i_clk(i_clk), 
-    .i_rst(i_rst),
+    .i_rst(w_fsm_rst),
 
     //control
     .o_start(w_start), 
@@ -92,10 +140,12 @@ FSM fsm(
     .o_data_in(w_data_in),
     .o_data_in_valid(w_data_in_valid),
 
-    .i_fifo_full(w_fifo_full)
+    .i_fifo_full(w_fifo_full),
+    .o_err(o_led_fsm_err)
 );
 
-i2c_master_oe i2c_master(
+i2c_master_oe #(.DATA_DEPTH(DATA_DEPTH), .CLK_DIV(CLK_DIV), .CLK_DIV_REG_BITS(CLK_DIV_REG_BITS)) 
+i2c_master(
     //control
     .i_clk(i_clk),
     .i_rst(i_rst),
@@ -126,18 +176,22 @@ i2c_master_oe i2c_master(
 
     //strict input lines
     .i_sda_in(w_sda_i),
-    .i_scl_in(scl),
+    .i_scl_in(w_scl_i),
     
     //tristate buffers separate lines
     .o_sda_oe(w_sda_oe),
-    .o_scl_oe(r_scl_oe),
+    .o_scl_oe(w_scl_oe),
 
     //strict output lines
     .o_sda_out(w_sda_o),
-    .o_scl_out(scl),
+    .o_scl_out(w_scl_o),
     
     .o_nak(w_nak)
 );
+
+//--------------------------------------------------------------------------------------------
+//FIFO
+//--------------------------------------------------------------------------------------------
 
 /*
                       __________
@@ -149,6 +203,10 @@ i2c_master_oe i2c_master(
 
 */
 
+//-------------------
+//wires and registers
+//-------------------
+
 //Escritura
 wire w_ready_in;
 wire [DATA_DEPTH-1:0] w_data_in;
@@ -158,7 +216,8 @@ reg r_fifo_ready_in;
 reg [DATA_DEPTH-1:0] r_fifo_data_out;            
 reg r_fifo_data_out_valid;
 
-FIFO fifo(
+FIFO #(.ADDR_LENGTH(DATA_DEPTH), .WORD_LENGTH(DATA_DEPTH))
+fifo(
     .i_clk(i_clk), 
     .i_reset(i_rst),
 
@@ -170,8 +229,13 @@ FIFO fifo(
     .o_data_out_valid(r_fifo_data_out_valid),
     .i_ready_out(r_fifo_ready_in),
 
-    .o_full(w_fifo_full)
+    .o_full(w_fifo_full),
+    .o_empty(w_fifo_empty)
 );
+
+//--------------------------------------------------------------------------------------------
+//UART
+//--------------------------------------------------------------------------------------------
 
 /*
 
@@ -189,6 +253,10 @@ FIFO fifo(
             
 */
 
+//-------------------
+//wires and registers
+//-------------------
+
 reg [DIV_BITS-1:0] r_div = DIV_CLK_NUMBER;
 reg [DATA_DEPTH-1:0] r_uart_recived_data;
 reg [DATA_DEPTH-1:0] r_uart_send_data;
@@ -203,7 +271,7 @@ reg r_flag;
 
 wire w_rxerr;
 
-uart uart(
+uart #(.DIV_BITS(DIV_BITS)) uart(
     .i_clk(i_clk),
     .i_rst(i_rst),
 
@@ -220,31 +288,152 @@ uart uart(
     .i_valid(r_uart_send_valid),             //Datos a enviar tomados o no tomados
     .o_ready(r_uart_send_data_ready),        //Informacion enviada o lista para enviar
 
-    .o_rxerr(w_rxerr)
+    .o_rxerr(o_led_uart_err)
 
 );
 
+//--------------------------------------------------------------------------------------------
+//SB_IO Instantiation
+//--------------------------------------------------------------------------------------------
+
+wire w_clock_enable;
+wire w_d_out_0;
+wire w_d_in_0;
+wire w_d_out_1;
+wire w_d_in_1;
+reg r_latch_input_value = 1'b0;
+
+wire w_package_pin_scl;
+wire w_package_pin_sda;
+
+assign w_package_pin_scl = scl;
+assign w_package_pin_sda = sda;
+
+//-------
+//SDA pin
+//-------
+
+SB_IO
+IO_PIN_SDA_INST
+(
+.PACKAGE_PIN (w_package_pin_sda),                 // User’s Pin signal name
+.LATCH_INPUT_VALUE (r_latch_input_value),     // Latches/holds the Input value
+.CLOCK_ENABLE (w_clock_enable),             // Clock Enable common to input and output clock
+.INPUT_CLK (i_clk),                         // Clock for the input registers
+.OUTPUT_CLK (i_clk),                        // Clock for the output registers
+.OUTPUT_ENABLE (w_sda_oe),                  // Output Pin Tristate/Enable control
+.D_OUT_0 (w_sda_o),                         // Data 0 – out to Pin/Rising clk edge
+.D_OUT_1 (w_d_out_0),                         // Data 1 - out to Pin/Falling clk edge
+.D_IN_0 (w_sda_i),                           // Data 0 - Pin input/Rising clk edge
+.D_IN_1 (w_d_in_0)                            // Data 1 – Pin input/Falling clk edge
+); // synthesis DRIVE_STRENGTH= x2
+
+defparam IO_PIN_SDA_INST.PIN_TYPE = 6'b101001;
+// See Input and Output Pin Function Tables.
+// Default value of PIN_TYPE = 6’000000 i.e.
+// an input pad, with the input signal
+// registered.
+defparam IO_PIN_SDA_INST.PULLUP = 1'b0;
+// By default, the IO will have NO pull up.
+// This parameter is used only on bank 0, 1,
+// and 2. Ignored when it is placed at bank 3
+defparam IO_PIN_SDA_INST.NEG_TRIGGER = 1'b0;
+// Specify the polarity of all FFs in the IO to
+// be falling edge when NEG_TRIGGER = 1.
+// Default is rising edge.
+defparam IO_PIN_SDA_INST.IO_STANDARD = "SB_LVCMOS";
+// Other IO standards are supported in bank 3
+// only: SB_SSTL2_CLASS_2, SB_SSTL2_CLASS_1,
+// SB_SSTL18_FULL, SB_SSTL18_HALF, SB_MDDR10,
+// SB_MDDR8, SB_MDDR4, SB_MDDR2 etc.
+
+//-------
+//SCL pin
+//-------
+
+SB_IO
+IO_PIN_SCL_INST
+(
+.PACKAGE_PIN (w_package_pin_scl),                 // User’s Pin signal name
+.LATCH_INPUT_VALUE (r_latch_input_value),     // Latches/holds the Input value
+.CLOCK_ENABLE (w_clock_enable),             // Clock Enable common to input and output clock
+.INPUT_CLK (i_clk),                         // Clock for the input registers
+.OUTPUT_CLK (i_clk),                        // Clock for the output registers
+.OUTPUT_ENABLE (w_scl_oe),                  // Output Pin Tristate/Enable control
+.D_OUT_0 (w_scl_o),                         // Data 0 – out to Pin/Rising clk edge
+.D_OUT_1 (w_d_out_1),                         // Data 1 - out to Pin/Falling clk edge
+.D_IN_0 (w_scl_i),                           // Data 0 - Pin input/Rising clk edge
+.D_IN_1 (w_d_in_1)                            // Data 1 – Pin input/Falling clk edge
+); //synthesis DRIVE_STRENGTH= x2
+defparam IO_PIN_SCL_INST.PIN_TYPE = 6'b101001;
+// See Input and Output Pin Function Tables.
+// Default value of PIN_TYPE = 6’000000 i.e.
+// an input pad, with the input signal
+// registered.
+defparam IO_PIN_SCL_INST.PULLUP = 1'b0;
+// By default, the IO will have NO pull up.
+// This parameter is used only on bank 0, 1,
+// and 2. Ignored when it is placed at bank 3
+defparam IO_PIN_SCL_INST.NEG_TRIGGER = 1'b0;
+// Specify the polarity of all FFs in the IO to
+// be falling edge when NEG_TRIGGER = 1.
+// Default is rising edge.
+defparam IO_PIN_SCL_INST.IO_STANDARD = "SB_LVCMOS";
+// Other IO standards are supported in bank 3
+// only: SB_SSTL2_CLASS_2, SB_SSTL2_CLASS_1,
+// SB_SSTL18_FULL, SB_SSTL18_HALF, SB_MDDR10,
+// SB_MDDR8, SB_MDDR4, SB_MDDR2 etc.
+
+//--------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------
+
+/*
+
+//Metodo para simular
+
 assign sda = w_sda_oe ? w_sda_o : 1'bz;
 assign w_sda_i = sda;
+assign scl = w_scl_o;
+assign w_scl_i = scl;
 
+assign w_fsm_rst = r_fsm_rst | i_rst;
+
+*/
+
+//--------------------------------------------------------------------------------------------
 //UART and FIFO LOGIC
+//--------------------------------------------------------------------------------------------
+
+reg [31:0] r_counter = 26000050;
+reg r_led_status;
+
+assign o_led_fifo_empty = w_fifo_empty;
 
 always @(posedge i_clk or posedge i_rst) begin
     if(i_rst) begin
+        r_led_status = 1'b0;
+        r_fsm_rst = 1'b0;
         r_uart_send_data = 0;
         r_uart_recived_data_ready = 1'b0;
         r_uart_send_valid = 1'b0;
         r_fifo_ready_in = 1'b0;
-        r_uart_recived_valid_prev = r_uart_recived_valid;
+        r_uart_recived_valid_prev = 1'b1;
         r_flag = 1'b0;                      //Para que no vuelva a entrar y generar pulsos de señal indeseados
     end
     else begin
 
-        if(r_uart_recived_valid_prev==1'b0 & r_uart_recived_valid==1'b1) begin
+        if(r_uart_recived_data==0) begin
             r_flag = 1'b0;
         end
+        else if(r_fsm_rst) begin
+            r_fsm_rst = 1'b0;
+        end
 
-        if(r_uart_recived_data==SEND_SENSOR_DATA & r_uart_recived_valid & (!r_fifo_ready_in) & (!r_uart_recived_data_ready) & (!r_flag)) begin
+        if(r_uart_recived_data==RESET_FSM & r_uart_recived_valid & (!r_uart_recived_data_ready) & (!r_fsm_rst) & (!r_flag)) begin
+            r_fsm_rst = 1'b1;
+            r_flag = 1'b1;
+        end
+        else if(r_uart_recived_data==SEND_SENSOR_DATA & r_uart_recived_valid & (!r_fifo_ready_in) & (!r_uart_recived_data_ready) & (!r_flag) & (!w_fifo_empty)) begin
             r_fifo_ready_in = 1'b1;
             r_flag = 1'b1;
         end
@@ -257,16 +446,19 @@ always @(posedge i_clk or posedge i_rst) begin
             r_uart_send_valid = 1'b0;
         end
 
-        r_uart_recived_valid_prev = r_uart_recived_valid;
+        if(r_counter <= 50) begin
+            r_led_status = ~r_led_status;
+            r_counter = 26000050;
+        end
+        else begin
+            r_counter = r_counter - 1;
+        end
 
     end
+
+    o_led_status = r_led_status;
 
 end
 
 endmodule
 
-/*
-COSAS QUE TERMINAR
-
-Contemplar el caso de FIFO llena
-*/

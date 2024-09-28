@@ -1,0 +1,143 @@
+# -----------------------------------------------------------------------------
+#- LATTICE-ICE40HX4K-FPGA constraint file (.pcf)
+#- Sep - 2020
+#- GPL license
+#- Repo: https://gitlab.com/educiaafpga
+#- Pinout: https://github.com/ciaa/Hardware/blob/master/PCB/EDU-FPGA/Pinout/Pinout%20EDU%20FPGA.pdf
+# -----------------------------------------------------------------------------
+
+# ----------------- Unconected ------------------------------------------------
+
+set_io --warn-no-port U1 7
+set_io --warn-no-port U2 18
+set_io --warn-no-port U3 28
+set_io --warn-no-port U4 29
+set_io --warn-no-port U5 42
+set_io --warn-no-port U6 43
+set_io --warn-no-port U7 44
+set_io --warn-no-port U8 45
+set_io --warn-no-port U9 47
+set_io --warn-no-port U10 63
+set_io --warn-no-port U11 64
+set_io --warn-no-port U12 78
+set_io --warn-no-port U13 79
+set_io --warn-no-port U14 80
+set_io --warn-no-port U15 81
+set_io --warn-no-port U16 82
+set_io --warn-no-port U17 83
+set_io --warn-no-port U18 84
+set_io --warn-no-port U19 85
+set_io --warn-no-port U20 87
+set_io --warn-no-port U21 88
+set_io --warn-no-port U22 90
+set_io --warn-no-port U23 91
+set_io --warn-no-port U24 96
+set_io --warn-no-port U25 97
+set_io --warn-no-port U26 98
+set_io --warn-no-port U27 99
+set_io --warn-no-port U28 101
+set_io --warn-no-port U29 102
+set_io --warn-no-port U30 115
+set_io --warn-no-port U31 116
+set_io --warn-no-port U32 117
+set_io --warn-no-port U33 118
+set_io --warn-no-port U34 119
+set_io --warn-no-port U35 120
+set_io --warn-no-port U36 121
+set_io --warn-no-port U37 122
+set_io --warn-no-port U38 124
+set_io --warn-no-port U39 125
+set_io --warn-no-port U40 128
+set_io --warn-no-port U41 129
+set_io --warn-no-port U42 130
+set_io --warn-no-port U43 134
+set_io --warn-no-port U44 135
+set_io --warn-no-port U45 136
+set_io --warn-no-port U46 139
+
+# ----------------- CLOCK (OSC_OUT) -----------------------------------------
+
+set_io --warn-no-port CLOCK 93
+
+# ----------------- User LEDs -----------------------------------------------
+set_io --warn-no-port LED0 8
+set_io --warn-no-port LED1 9
+set_io --warn-no-port LED2 10
+set_io --warn-no-port LED3 11
+set_io --warn-no-port LED4 12
+set_io --warn-no-port LED5 15
+set_io --warn-no-port LED6 16
+set_io --warn-no-port LED7 17
+
+# ----------------- Sensors -------------------------------------------------
+
+set_io --warn-no-port ALERT1 1
+set_io --warn-no-port SCL1 2
+set_io --warn-no-port SDA1 3
+set_io --warn-no-port THERM1 4
+
+set_io --warn-no-port ALERT2 31
+set_io --warn-no-port SCL2 32
+set_io --warn-no-port SDA2 33
+set_io --warn-no-port THERM2 34
+
+set_io --warn-no-port SCL3 37
+set_io --warn-no-port SDA3 38
+set_io --warn-no-port ALERT3 39
+set_io --warn-no-port THERM3 41
+
+set_io --warn-no-port SCL4 48
+set_io --warn-no-port SDA4 49
+set_io --warn-no-port ALERT4 52
+set_io --warn-no-port THERM4 55
+
+set_io --warn-no-port SCL5 73
+set_io --warn-no-port SDA5 74
+set_io --warn-no-port ALERT5 75
+set_io --warn-no-port THERM5 76
+
+set_io --warn-no-port SCL6 104
+set_io --warn-no-port SDA6 105
+set_io --warn-no-port ALERT6 106
+set_io --warn-no-port THERM6 107
+
+set_io --warn-no-port THERM7 110
+set_io --warn-no-port SDA7 112
+set_io --warn-no-port SCL7 113
+set_io --warn-no-port ALERT7 114
+
+set_io --warn-no-port ALERT8 141
+set_io --warn-no-port SCL8 142
+set_io --warn-no-port SDA8 143
+set_io --warn-no-port THERM8 144
+
+# ----------------- Switchs -------------------------------------------------
+
+set_io --warn-no-port SW8 19
+set_io --warn-no-port SW7 20
+set_io --warn-no-port SW6 21
+set_io --warn-no-port SW5 22
+set_io --warn-no-port SW4 23
+set_io --warn-no-port SW3 24
+set_io --warn-no-port SW2 25
+set_io --warn-no-port SW1 26
+
+# ----------------- OBC_SPI -------------------------------------------------
+
+set_io --warn-no-port OBC_CS 56
+set_io --warn-no-port OBC_MOSI 60
+set_io --warn-no-port OBC_MISO 61
+set_io --warn-no-port OBC_SCLK 62
+
+# ----------------- I2C -----------------------------------------------------
+
+set_io --warn-no-port SDA 94
+set_io --warn-no-port SCL 95
+
+# ----------------- UART ----------------------------------------------------
+
+set_io --warn-no-port TX 137
+set_io --warn-no-port RX 138
+
+
+
