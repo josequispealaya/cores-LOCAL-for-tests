@@ -13,6 +13,7 @@ module fsm_i2c_fifo #(
     CONFIG_REGISTER_READ = 3,          //el valor real del sensor de temperatura es 0x09 para escribir y 0x03 para leer
     CONFIG_REGISTER_DATA = 4,
     SENSOR_DATA = 0,
+    SENSOR_DECIMAL_FRACTION_DATA = 15,
     ADDR_LENGTH = 8,
     //i2c master
     CLK_DIV = 16,
@@ -20,13 +21,23 @@ module fsm_i2c_fifo #(
 ) (
     input i_clk,
     input i_rst,
+    input i_fsm_rst,
 
-    inout sda,
-    inout scl,
+    //strict input lines
+    input i_sda_in,
+    input i_scl_in,
+    
+    //tristate buffers separate lines
+    output reg o_sda_oe,
+    output reg o_scl_oe,
+
+    //strict output lines
+    output reg o_sda_out,
+    output reg o_scl_out,
 
     input i_fifo_data_out_extracted,
-    output o_fifo_data_out_ready_to_extract,
-    output reg [DATA_DEPTH:0] o_fifo_data_out
+    output reg o_fifo_data_out_valid_to_extract,
+    output reg [DATA_DEPTH-1:0] o_fifo_data_out
 
 );
     
@@ -41,8 +52,6 @@ module fsm_i2c_fifo #(
 wire w_start;
 wire w_nak;
 wire w_err;
-wire w_fsm_rst;
-reg r_fsm_rst = 0;
 
 wire w_addr_ready;
 wire [DATA_DEPTH-1:0] w_addr_bits; 
@@ -94,11 +103,14 @@ FSM #(
     .CONFIG_REGISTER_WRITE(CONFIG_REGISTER_WRITE),         //A modo de prueba se cambio el valor para que sea el mismo y se pueda comprobar
     .CONFIG_REGISTER_READ(CONFIG_REGISTER_READ),          //el valor real del sensor de temperatura es 0x09 para escribir y 0x03 para leer
     .CONFIG_REGISTER_DATA(CONFIG_REGISTER_DATA),
-    .SENSOR_DATA(SENSOR_DATA)
+    .SENSOR_DATA(SENSOR_DATA),
+    .SENSOR_DECIMAL_FRACTION_DATA(SENSOR_DECIMAL_FRACTION_DATA)
     ) 
     fsm(
     .i_clk(i_clk), 
-    .i_rst(w_fsm_rst),
+    .i_rst(i_rst),
+
+    .i_force_rst(i_fsm_rst),
 
     //control
     .o_start(w_start), 
@@ -164,16 +176,16 @@ i2c_master(
     //of io ports
 
     //strict input lines
-    .i_sda_in(w_sda_i),
-    .i_scl_in(w_scl_i),
+    .i_sda_in(i_sda_in),
+    .i_scl_in(i_scl_in),
     
     //tristate buffers separate lines
-    .o_sda_oe(w_sda_oe),
-    .o_scl_oe(w_scl_oe),
+    .o_sda_oe(o_sda_oe),
+    .o_scl_oe(o_scl_oe),
 
     //strict output lines
-    .o_sda_out(w_sda_o),
-    .o_scl_out(w_scl_o),
+    .o_sda_out(o_sda_out),
+    .o_scl_out(o_scl_out),
     
     .o_nak(w_nak)
 );
@@ -201,9 +213,6 @@ wire w_ready_in;
 wire [DATA_DEPTH-1:0] w_data_in;
 wire w_data_in_valid;
 //Lectura
-reg r_fifo_ready_in;
-reg [DATA_DEPTH-1:0] r_fifo_data_out;            
-reg r_fifo_data_out_valid;
 
 FIFO #(.ADDR_LENGTH(DATA_DEPTH), .WORD_LENGTH(DATA_DEPTH))
 fifo(
@@ -214,9 +223,9 @@ fifo(
     .i_data_in_valid(w_data_in_valid),
     .o_ready_in(w_ready_in),
 
-    .o_data_out(r_fifo_data_out),
-    .o_data_out_valid(r_fifo_data_out_valid),
-    .i_ready_out(r_fifo_ready_in),
+    .o_data_out(o_fifo_data_out),
+    .o_data_out_valid(o_fifo_data_out_valid_to_extract),
+    .i_ready_out(i_fifo_data_out_extracted),
 
     .o_full(w_fifo_full),
     .o_empty(w_fifo_empty)

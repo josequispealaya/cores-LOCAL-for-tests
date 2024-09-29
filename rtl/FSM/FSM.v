@@ -12,6 +12,8 @@ module FSM #(
      input i_clk, 
      input i_rst,
 
+     input i_force_rst,
+
      //control
      output reg o_start, 
      
@@ -302,6 +304,15 @@ always @(r_state or r_i2c_load_data_contr)
 always @(posedge i_clk or posedge i_rst)
      begin
           if (i_rst) begin
+               r_state = RESET;
+               r_counterAck = 0;
+               r_counterConfig = 0;
+               r_i2c_load_data_contr = IDLE;
+               r_prev_nak = 0;
+               r_prev_contr = IDLE;
+               r_get_decimal_fraction = 1'b0;
+          end
+          else if (i_force_rst) begin
                r_state = RESET;
                r_counterAck = 0;
                r_counterConfig = 0;

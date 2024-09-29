@@ -13,8 +13,10 @@ import cocotb.types
 
 #REGISTROS
 #------------------------------------------------------------------------
-none = ['0','1','1','1','0','1','1','0']
-registers = [none,none,none,none,none,none,none,none,none]
+none = ['0','0','0','0','0','0','0','0']
+data = ['0','0','0','1','0','0','1','0']
+data_decimal = ['0','1','1','1','0','0','0','0']
+registers = [data,none,none,none,none,none,none,none,none,none,none,none,none,none,none,data_decimal,none,none]
 #------------------------------------------------------------------------
 
 #INDICES
@@ -46,8 +48,8 @@ REGISTER_POINTER_CONFIG_SLAVE = "00001001"        # 0x09
 REGISTER_CONFIG_DATA_SLAVE = "00001000"           # 0x04
 ADDR_VECTOR = "01001110"                          # 0x4e
 data_write_vector = []
-UART_MESSAGE = "11110010"#"11110010" y "01000000" # 79 para obtener los datos del sensor y 2 para solo resetear la FSM             
-UART_DIVIDER_NUMBER = 226                         # (Clock/Baudrate)
+UART_MESSAGE = "01100001"#"11110010" y "01000000" # 97 para obtener los datos del sensor 0 y 105 para solo resetear la FSM 0            
+UART_DIVIDER_NUMBER = 230                         # (Clock/Baudrate)
 #------------------------------------------------------------------------
 
 #ESTADOS I2C SLAVE
@@ -67,7 +69,7 @@ clk = 0
 uart_state = IDLE
 uart_counter = UART_DIVIDER_NUMBER
 uart_message_index = 0
-CANT_PEDIDOS_INFO_SENSOR = 1                      # Cantidad de veces que se quiere pedir informacion
+CANT_PEDIDOS_INFO_SENSOR = 5                      # Cantidad de veces que se quiere pedir informacion
 uart_contador_pedidos = CANT_PEDIDOS_INFO_SENSOR - 1
 #------------------------------------------------------------------------
 

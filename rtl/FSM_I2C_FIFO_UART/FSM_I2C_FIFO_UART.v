@@ -1,8 +1,5 @@
-`include "../FSM/FSM.v"
-`include "../i2c_master/i2c_master_oe.v"
-`include "../fifo/fifo_internal/fifo_internal.v"
-`include "../fifo/interface/fifo.v"
-`include "../fifo/ram_dualport.v"
+`include "../FSM_I2C_FIFO/FSM_I2C_FIFO.v"
+`include "../UART_FSM/UART_FSM.v"
 `include "../uart/uart.v"
 `include "../uart/uart_rx.v"
 `include "../uart/uart_tx.v"
@@ -11,7 +8,7 @@
 module FSM_I2C_FIFO_UART #(
     parameter DATA_DEPTH = 8, 
     DIV_BITS = 16, 
-    DIV_CLK_NUMBER=170, 
+    DIV_CLK_NUMBER=14,//170, 
     SEND_SENSOR_DATA = 60, 
     RESET_FSM = 126,
     NBYTES = 0,                        //El i2c_master empieza a contar desde el cero (0=leer una vez)
@@ -21,10 +18,30 @@ module FSM_I2C_FIFO_UART #(
     CONFIG_REGISTER_READ = 3,          //el valor real del sensor de temperatura es 0x09 para escribir y 0x03 para leer
     CONFIG_REGISTER_DATA = 4,
     SENSOR_DATA = 0,
+    SENSOR_DECIMAL_FRACTION_DATA = 15,
     ADDR_LENGTH = 8,
+
     //i2c master
     CLK_DIV = 16,
-    CLK_DIV_REG_BITS = 24
+    CLK_DIV_REG_BITS = 24,
+
+    //UART_FSM
+    DATA_SENSOR0 = 97,
+    DATA_SENSOR1 = 98,
+    DATA_SENSOR2 = 99,
+    DATA_SENSOR3 = 100,
+    DATA_SENSOR4 = 101,
+    DATA_SENSOR5 = 102,
+    DATA_SENSOR6 = 103,
+    DATA_SENSOR7 = 104,
+    FSM_SENSOR0 =  105,
+    FSM_SENSOR1 =  106,
+    FSM_SENSOR2 =  107,
+    FSM_SENSOR3 =  108,
+    FSM_SENSOR4 =  109,
+    FSM_SENSOR5 =  110,
+    FSM_SENSOR6 =  111,
+    FSM_SENSOR7 =  112
 )(
     input i_clk,
     input i_rst,
@@ -34,45 +51,43 @@ module FSM_I2C_FIFO_UART #(
 
     output reg o_led_status,    //Para verificar que la FPGA siga funcionando
     output reg o_led_uart_err,
-    output reg o_led_fsm_err,
-    output o_led_fifo_empty,
 
     inout sda,            //Para simulacion hay assign comentados mas abajo)
     inout scl
 );
 
 //--------------------------------------------------------------------------------------------
-//FSM and I2C master
+//FSM I2C y FIFO
 //--------------------------------------------------------------------------------------------
 
+/*
+
+                                         __________
+                                        |          |
+           i_fifo_data_out_extracted--->|          |
+                                        |          |
+                                        |   I2C    |
+                                        |   FSM    |<--->sda
+                     o_fifo_data_out<---|   FIFO   |<--->scl
+                                        |          |
+                                        |          |
+    o_fifo_data_out_valid_to_extract<---|          |
+                                        |__________|             
+            
+*/
+
+
 //-------------------
-//Wires and registers
+//wires and registers
 //-------------------
 
-wire w_start;
-wire w_nak;
-wire w_err;
+wire aux;
+
 wire w_fsm_rst;
-reg r_fsm_rst = 0;
 
-wire w_addr_ready;
-wire [DATA_DEPTH-1:0] w_addr_bits; 
-wire w_addr_valid;
-
-//read parameters
-wire w_nbytes_ready;
-wire [DATA_DEPTH-1:0] w_nbytes_bits;
-wire w_nbytes_valid;
-
-//read interface
-wire [DATA_DEPTH-1:0] w_data_read_bits;
-wire w_data_read_valid;
-wire w_data_read_ready;
-
-//write interface
-wire w_data_write_ready;         
-wire [DATA_DEPTH-1:0] w_data_write_bits;
-wire w_data_write_valid;
+wire w_fifo_data_out_extracted;
+wire w_fifo_data_out_valid_to_extract;
+wire [DATA_DEPTH-1:0] w_fifo_data_out;
 
 //Input Output interface
 wire w_sda_oe;
@@ -84,97 +99,25 @@ wire w_scl_oe;
 wire w_scl_o;
 wire w_scl_i;
 
-//Registers
-reg r_prev_val;
-reg r_in_out_sda;
-reg r_sda;
-
-//FSM fifo interface
-wire w_fifo_full;
-wire w_fifo_empty;
-
-//-------------------
-//Modules
-//-------------------
-
-FSM #(
-    .DATA_DEPTH(DATA_DEPTH),
+fsm_i2c_fifo #(
+    .DATA_DEPTH(DATA_DEPTH),  
     .NBYTES(NBYTES),                        //El i2c_master empieza a contar desde el cero (0=leer una vez)
     .ADDR_SLAVE_READ(ADDR_SLAVE_READ),
     .ADDR_SLAVE_WRITE(ADDR_SLAVE_WRITE),
     .CONFIG_REGISTER_WRITE(CONFIG_REGISTER_WRITE),         //A modo de prueba se cambio el valor para que sea el mismo y se pueda comprobar
     .CONFIG_REGISTER_READ(CONFIG_REGISTER_READ),          //el valor real del sensor de temperatura es 0x09 para escribir y 0x03 para leer
     .CONFIG_REGISTER_DATA(CONFIG_REGISTER_DATA),
-    .SENSOR_DATA(SENSOR_DATA)
-    ) 
-    fsm(
-    .i_clk(i_clk), 
-    .i_rst(w_fsm_rst),
-
-    //control
-    .o_start(w_start), 
-    
-    //addr interface
-    .i_addr_ready(w_addr_ready),
-    .o_addr_bits(w_addr_bits), 
-    .o_addr_valid(w_addr_valid),
-
-    //read parameters
-    .i_nbytes_ready(w_nbytes_ready),
-    .o_nbytes_bits(w_nbytes_bits),
-    .o_nbytes_valid(w_nbytes_valid),
-
-    //read interface
-    .i_data_read_bits(w_data_read_bits),
-    .i_data_read_valid(w_data_read_valid),
-    .o_data_read_ready(w_data_read_ready),
-
-    //write interface
-    .i_data_write_ready(w_data_write_ready),                         
-    .o_data_write_bits(w_data_write_bits),
-    .o_data_write_valid(w_data_write_valid),
-
-    .i_nak(w_nak),
-
-    .i_ready_in(w_ready_in),
-    .o_data_in(w_data_in),
-    .o_data_in_valid(w_data_in_valid),
-
-    .i_fifo_full(w_fifo_full),
-    .o_err(o_led_fsm_err)
-);
-
-i2c_master_oe #(.DATA_DEPTH(DATA_DEPTH), .CLK_DIV(CLK_DIV), .CLK_DIV_REG_BITS(CLK_DIV_REG_BITS)) 
-i2c_master(
-    //control
+    .SENSOR_DATA(SENSOR_DATA),
+    .SENSOR_DECIMAL_FRACTION_DATA(SENSOR_DECIMAL_FRACTION_DATA),
+    .ADDR_LENGTH(ADDR_LENGTH),
+    //i2c master
+    .CLK_DIV(CLK_DIV),
+    .CLK_DIV_REG_BITS(CLK_DIV_REG_BITS)
+) fsm_i2c_fifo (
     .i_clk(i_clk),
     .i_rst(i_rst),
-    .i_start(w_start), 
+    .i_fsm_rst(w_fsm_rst),
 
-    //stream input addr interface
-    .i_addr_bits(w_addr_bits),
-    .i_addr_valid(w_addr_valid),
-    .o_addr_ready(w_addr_ready),
-
-    //stream input number of bytes to read
-    .i_nbytes_bits(w_nbytes_bits),
-    .i_nbytes_valid(w_nbytes_valid),
-    .o_nbytes_ready(w_nbytes_ready),
-
-    //stream input data interface
-    .i_data_bits(w_data_write_bits),
-    .i_data_valid(w_data_write_valid),
-    .o_data_ready(w_data_write_ready),
-
-    //stream output read data
-    .o_data_bits(w_data_read_bits),
-    .o_data_valid(w_data_read_valid),
-    .i_data_ready(w_data_read_ready),
-
-    //i2c lines splitted for manual instantiation
-    //of io ports
-
-    //strict input lines
     .i_sda_in(w_sda_i),
     .i_scl_in(w_scl_i),
     
@@ -185,52 +128,80 @@ i2c_master(
     //strict output lines
     .o_sda_out(w_sda_o),
     .o_scl_out(w_scl_o),
-    
-    .o_nak(w_nak)
+
+    .i_fifo_data_out_extracted(w_fifo_data_out_extracted),
+    .o_fifo_data_out_valid_to_extract(w_fifo_data_out_valid_to_extract),
+    .o_fifo_data_out(w_fifo_data_out)
+
 );
 
+
 //--------------------------------------------------------------------------------------------
-//FIFO
+//UART_FSM
 //--------------------------------------------------------------------------------------------
 
 /*
-                      __________
-                     |          |
-        ready_out--->|          |<---data_in
-         data_out<---|   FIFO   |<---data_in_valid
-   data_out_valid<---|          |--->ready_in
-                     |__________|
 
+                                         __________
+                                        |          |
+                 i_uart_recived_data--->|          |
+                i_uart_recived_valid--->|          |
+           o_uart_recived_data_ready<---|          |
+                                        |   UART   |--->o_fifo0_data_out_extracted
+                    o_uart_send_data<---|   FSM    |<---i_fifo0_data_out_valid_to_extract
+                   o_uart_send_valid<---|          |<---i_fifo0_data_out
+              i_uart_send_data_ready--->|          |
+                                        |          |
+                                        |__________|             
+            
 */
 
 //-------------------
 //wires and registers
 //-------------------
 
-//Escritura
-wire w_ready_in;
-wire [DATA_DEPTH-1:0] w_data_in;
-wire w_data_in_valid;
-//Lectura
-reg r_fifo_ready_in;
-reg [DATA_DEPTH-1:0] r_fifo_data_out;            
-reg r_fifo_data_out_valid;
+wire [DATA_DEPTH-1:0] w_uart_recived_data;
+wire w_uart_recived_valid;
+wire w_uart_recived_data_ready;
 
-FIFO #(.ADDR_LENGTH(DATA_DEPTH), .WORD_LENGTH(DATA_DEPTH))
-fifo(
-    .i_clk(i_clk), 
-    .i_reset(i_rst),
+wire [DATA_DEPTH-1:0] w_uart_send_data;
+wire w_uart_send_valid;
+wire w_uart_send_data_ready;
 
-    .i_data_in(w_data_in),
-    .i_data_in_valid(w_data_in_valid),
-    .o_ready_in(w_ready_in),
+UART_FSM #(.DATA_DEPTH(DATA_DEPTH),
+    .DATA_SENSOR0(DATA_SENSOR0),
+    .DATA_SENSOR1(DATA_SENSOR1),
+    .DATA_SENSOR2(DATA_SENSOR2),
+    .DATA_SENSOR3(DATA_SENSOR3),
+    .DATA_SENSOR4(DATA_SENSOR4),
+    .DATA_SENSOR5(DATA_SENSOR5),
+    .DATA_SENSOR6(DATA_SENSOR6),
+    .DATA_SENSOR7(DATA_SENSOR7),
+    .FSM_SENSOR0(FSM_SENSOR0),
+    .FSM_SENSOR1(FSM_SENSOR1),
+    .FSM_SENSOR2(FSM_SENSOR2),
+    .FSM_SENSOR3(FSM_SENSOR3),
+    .FSM_SENSOR4(FSM_SENSOR4),
+    .FSM_SENSOR5(FSM_SENSOR5),
+    .FSM_SENSOR6(FSM_SENSOR6),
+    .FSM_SENSOR7(FSM_SENSOR7)
+)
+UART_FSM (
+    .i_clk(i_clk),
+    .i_rst(i_rst),
 
-    .o_data_out(r_fifo_data_out),
-    .o_data_out_valid(r_fifo_data_out_valid),
-    .i_ready_out(r_fifo_ready_in),
+    .i_uart_recived_data(w_uart_recived_data),
+    .i_uart_recived_valid(w_uart_recived_valid),
+    .o_uart_recived_data_ready(w_uart_recived_data_ready),
 
-    .o_full(w_fifo_full),
-    .o_empty(w_fifo_empty)
+    .o_uart_send_data(w_uart_send_data),
+    .o_uart_send_valid(w_uart_send_valid),
+    .i_uart_send_data_ready(w_uart_send_data_ready),
+
+    .o_fifo0_data_out_extracted(w_fifo_data_out_extracted),
+    .i_fifo0_data_out_valid_to_extract(w_fifo_data_out_valid_to_extract),
+    .i_fifo0_data_out(w_fifo_data_out),
+    .o_fsm_rst(w_fsm_rst)
 );
 
 //--------------------------------------------------------------------------------------------
@@ -280,17 +251,19 @@ uart #(.DIV_BITS(DIV_BITS)) uart(
     .i_rxd(i_rx),
     .o_txd(o_tx),
 
-    .o_data(r_uart_recived_data),            //Datos recividos
-    .o_valid(r_uart_recived_valid),          //Datos recividos extraidos
-    .i_ready(r_uart_recived_data_ready),     //Infromacion lista para ser extraida de nuevo
+    .o_data(w_uart_recived_data),            //Datos recividos
+    .o_valid(w_uart_recived_valid),          //Datos recividos extraidos
+    .i_ready(w_uart_recived_data_ready),     //Infromacion lista para ser extraida de nuevo
 
-    .i_data(r_uart_send_data),               //Datos a enviar
-    .i_valid(r_uart_send_valid),             //Datos a enviar tomados o no tomados
-    .o_ready(r_uart_send_data_ready),        //Informacion enviada o lista para enviar
+    .i_data(w_uart_send_data),               //Datos a enviar
+    .i_valid(w_uart_send_valid),             //Datos a enviar tomados o no tomados
+    .o_ready(w_uart_send_data_ready),        //Informacion enviada o lista para enviar
 
     .o_rxerr(o_led_uart_err)
 
 );
+
+/*
 
 //--------------------------------------------------------------------------------------------
 //SB_IO Instantiation
@@ -387,6 +360,7 @@ defparam IO_PIN_SCL_INST.IO_STANDARD = "SB_LVCMOS";
 //--------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------
 
+*/
 /*
 
 //Metodo para simular
@@ -396,9 +370,9 @@ assign w_sda_i = sda;
 assign scl = w_scl_o;
 assign w_scl_i = scl;
 
-assign w_fsm_rst = r_fsm_rst | i_rst;
-
 */
+
+//assign w_fsm_rst = w_uart_fsm_fsm_rst | i_rst;
 
 //--------------------------------------------------------------------------------------------
 //UART and FIFO LOGIC
@@ -407,44 +381,11 @@ assign w_fsm_rst = r_fsm_rst | i_rst;
 reg [31:0] r_counter = 26000050;
 reg r_led_status;
 
-assign o_led_fifo_empty = w_fifo_empty;
-
 always @(posedge i_clk or posedge i_rst) begin
     if(i_rst) begin
         r_led_status = 1'b0;
-        r_fsm_rst = 1'b0;
-        r_uart_send_data = 0;
-        r_uart_recived_data_ready = 1'b0;
-        r_uart_send_valid = 1'b0;
-        r_fifo_ready_in = 1'b0;
-        r_uart_recived_valid_prev = 1'b1;
-        r_flag = 1'b0;                      //Para que no vuelva a entrar y generar pulsos de señal indeseados
     end
     else begin
-
-        if(r_uart_recived_data==0) begin
-            r_flag = 1'b0;
-        end
-        else if(r_fsm_rst) begin
-            r_fsm_rst = 1'b0;
-        end
-
-        if(r_uart_recived_data==RESET_FSM & r_uart_recived_valid & (!r_uart_recived_data_ready) & (!r_fsm_rst) & (!r_flag)) begin
-            r_fsm_rst = 1'b1;
-            r_flag = 1'b1;
-        end
-        else if(r_uart_recived_data==SEND_SENSOR_DATA & r_uart_recived_valid & (!r_fifo_ready_in) & (!r_uart_recived_data_ready) & (!r_flag) & (!w_fifo_empty)) begin
-            r_fifo_ready_in = 1'b1;
-            r_flag = 1'b1;
-        end
-        else if(r_fifo_data_out_valid) begin
-            r_uart_send_data = r_fifo_data_out;
-            r_uart_send_valid = 1'b1;
-            r_fifo_ready_in = 1'b0;
-        end
-        else if(r_uart_send_valid == 1'b1) begin
-            r_uart_send_valid = 1'b0;
-        end
 
         if(r_counter <= 50) begin
             r_led_status = ~r_led_status;

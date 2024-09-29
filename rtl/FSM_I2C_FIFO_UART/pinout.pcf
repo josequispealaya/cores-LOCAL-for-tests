@@ -62,8 +62,8 @@ set_io --warn-no-port i_clk 93
 # ----------------- User LEDs -----------------------------------------------
 set_io --warn-no-port o_led_status 8
 set_io --warn-no-port o_led_uart_err 9
-set_io --warn-no-port o_led_fsm_err 10
-set_io --warn-no-port o_led_fifo_empty 11
+set_io --warn-no-port LED2 10
+set_io --warn-no-port LED3 11
 set_io --warn-no-port LED4 12
 set_io --warn-no-port LED5 15
 set_io --warn-no-port LED6 16
