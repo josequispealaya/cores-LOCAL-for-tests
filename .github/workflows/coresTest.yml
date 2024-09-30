@@ -5,7 +5,7 @@ name: CoresTest #Nombre del workflow
 on:
   push:
     branches:
-      - Uart_verilog_drafts # se activará sólo cuando se haga push en la rama Uart_verilog_drafts
+      - Uart_verilog_drafts # Esto es un test que se activará sólo cuando se haga push en la rama Uart_verilog_drafts
 
 jobs: #Son los trabajos que realizará, en este caso de forma secuencial
   Test:
