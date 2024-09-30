@@ -1,12 +1,17 @@
 name: CoresTest #Nombre del workflow
 
-on: push #Accion con la que se activa, en este caso con un push en cualquier branch
+#on: push #Acción con la que se activa, en este caso con un push en cualquier branch
+
+on:
+  push:
+    branches:
+      - Uart_verilog_drafts # se activará sólo cuando se haga push en la rama Uart_verilog_drafts
 
 jobs: #Son los trabajos que realizará, en este caso de forma secuencial
   Test:
     runs-on: ubuntu-latest #OS que usará la vm de github para correr el workflow
     steps: #pasos del workflow
-    - uses: actions/checkout@v4 #Es una accion propia de actions, lo que hace es traer la última version de la rama
+    - uses: actions/checkout@v4 # Descarga la última versión del código
 
     - name: Configurar mensaje de éxito
       run: echo "success_message=¡Todos los tests han pasado exitosamente!" >> $GITHUB_ENV
@@ -19,7 +24,6 @@ jobs: #Son los trabajos que realizará, en este caso de forma secuencial
 
     - name: Docker Login
       run: docker login --username utn-ba-sats --password ${{ secrets.GITHUB_TOKEN }} ghrc.io
-
 
     - name: Ejecutar todos los tests
       run: ./run_tests_pipeline.sh # Ejecutar el script que corre todos los tests
