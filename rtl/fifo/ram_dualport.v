@@ -17,10 +17,13 @@ reg [ADDR_BITS - 1 : 0] r_read_addr;
 
 reg [WORD_LENGTH - 1 : 0] MEMORY[2**ADDR_BITS - 1 : 0];
 
-assign r_write_addr = i_write_addr;
-assign r_read_addr = i_read_addr;
+//assign r_write_addr = i_write_addr;
+//assign r_read_addr = i_read_addr;
 
 always @(posedge w_clk) begin
+    r_write_addr <= i_write_addr;
+    r_read_addr <= i_read_addr;
+
     if (w_write_en == 1'b1) begin
         MEMORY[r_write_addr] <= w_data_in;
     end

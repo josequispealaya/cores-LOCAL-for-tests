@@ -51,10 +51,9 @@ module fsm_i2c_fifo #(
 
 wire w_start;
 wire w_nak;
-wire w_err;
 
 wire w_addr_ready;
-wire [DATA_DEPTH-1:0] w_addr_bits; 
+wire [DATA_DEPTH-1:0] w_addr_bits;
 wire w_addr_valid;
 
 //read parameters
@@ -72,24 +71,10 @@ wire w_data_write_ready;
 wire [DATA_DEPTH-1:0] w_data_write_bits;
 wire w_data_write_valid;
 
-//Input Output interface
-wire w_sda_oe;
-wire w_sda_o;
-wire w_sda_i;
-
-//Input output interface
-wire w_scl_oe;
-wire w_scl_o;
-wire w_scl_i;
-
-//Registers
-reg r_prev_val;
-reg r_in_out_sda;
-reg r_sda;
-
 //FSM fifo interface
 wire w_fifo_full;
 wire w_fifo_empty;
+wire w_led_fsm_err;
 
 //-------------------
 //Modules
@@ -106,7 +91,7 @@ FSM #(
     .SENSOR_DATA(SENSOR_DATA),
     .SENSOR_DECIMAL_FRACTION_DATA(SENSOR_DECIMAL_FRACTION_DATA)
     ) 
-    fsm(
+    FSM(
     .i_clk(i_clk), 
     .i_rst(i_rst),
 
@@ -142,7 +127,7 @@ FSM #(
     .o_data_in_valid(w_data_in_valid),
 
     .i_fifo_full(w_fifo_full),
-    .o_err(o_led_fsm_err)
+    .o_err(w_led_fsm_err)
 );
 
 i2c_master_oe #(.DATA_DEPTH(DATA_DEPTH), .CLK_DIV(CLK_DIV), .CLK_DIV_REG_BITS(CLK_DIV_REG_BITS)) 
@@ -230,5 +215,14 @@ fifo(
     .o_full(w_fifo_full),
     .o_empty(w_fifo_empty)
 );
+
+always @(posedge i_clk or posedge i_rst) begin
+    if(i_rst) begin
+    
+    end
+    else begin
+        r_fsm_addr_bits <= r_i2c_master_addr_bits;
+    end
+end
 
 endmodule

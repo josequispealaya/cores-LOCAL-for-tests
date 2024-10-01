@@ -137,7 +137,7 @@ assign o_nak = r_nak;
 
 always @(posedge i_clk or posedge i_rst) begin
 
-    r_fsm_tick <= '0;
+    r_fsm_tick <= 1'b0;
     r_oe_sda <= 1'b0;
     r_oe_scl <= 1'b0;
 
@@ -145,20 +145,20 @@ always @(posedge i_clk or posedge i_rst) begin
 
         r_nstate <= S_IDLE;
 
-        r_clkdiv_cntr <= '0;
+        r_clkdiv_cntr <= 0;
         r_clkdiv_div <= CLK_DIV;
         
-        r_proc_cntr <= '0;
+        r_proc_cntr <= 0;
         
         r_addr_ready <= 1'b1;
         r_idata_ready <= 1'b0;
         r_odata_valid <= 1'b0;
         r_nbytes_ready <= 1'b0;
 
-        r_addr_latch <= '0;
-        r_idata_latch <= '0;
-        r_odata_latch <= '0;
-        r_nbytes_latch <= '0;
+        r_addr_latch <= 0;
+        r_idata_latch <= 0;
+        r_odata_latch <= 0;
+        r_nbytes_latch <= 0;
         
         r_osda <= 1'b1;
         r_oscl <= 1'b1;
@@ -180,7 +180,7 @@ always @(posedge i_clk or posedge i_rst) begin
         
         r_clkdiv_cntr <= r_clkdiv_cntr + 1'b1;
         if (r_clkdiv_cntr >= r_clkdiv_div) begin
-            r_clkdiv_cntr <= '0;
+            r_clkdiv_cntr <= 0;
             r_fsm_tick <= 1'b1;
         end
 
@@ -370,7 +370,7 @@ always @(posedge i_clk or posedge i_rst) begin
                                 r_osda <= 1'b1;
                                 if (w_rw_flag) begin
                                     r_nsaftack <= S_REP_START;
-                                    r_nbytes_latch <= '0;
+                                    r_nbytes_latch <= 0;
                                     r_nbytes_ready <= 1'b1;
                                 end else begin
                                     r_nsaftack <= S_WRITE_BITS;
@@ -457,7 +457,7 @@ always @(posedge i_clk or posedge i_rst) begin
                             r_oscl <= 1'b0;
                             if (r_bit_cntr == 3'b0) begin
                                 r_bit_cntr <= 3'd7;
-                                r_odata_latch <= '0;
+                                r_odata_latch <= 0;
                                 r_nstate <= S_CHECK_ACK;
                                 r_nsaftack <= S_READ_BITS;
 //                                r_osda <= 1'bz;             //Libero el canal (alta impedancia)
@@ -503,7 +503,7 @@ always @(posedge i_clk or posedge i_rst) begin
                                 o_data_bits <= r_odata_latch;
                                 r_odata_valid <= 1'b1;
                                 r_bit_cntr <= 3'd7;
-                                if (r_nbytes_latch != '0) begin
+                                if (r_nbytes_latch != 0) begin
                                     r_nbytes_latch <= r_nbytes_latch - 1;
                                     r_nstate <= S_GEN_ACK;
                                 end else begin
@@ -577,7 +577,7 @@ always @(posedge i_clk or posedge i_rst) begin
                             r_oscl <= 1'b0;
                             r_proc_cntr <= 2'd0;
                             r_nstate <= S_READ_BITS;
-                            r_odata_latch <= '0;
+                            r_odata_latch <= 0;
                             
                         end
 

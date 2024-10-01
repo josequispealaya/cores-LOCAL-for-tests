@@ -26,7 +26,7 @@ synthesis:
 
 # Ejecutar Place and Route
 pnr:
-	nextpnr-ice40 $(SIZE) --package $(PACKAGE) --json $(TOP_LEVEL_FILE).json --pcf ../$(PINOUT_FILE) --asc $(TOP_LEVEL_FILE).asc
+	nextpnr-ice40 $(SIZE) --package $(PACKAGE) --json $(TOP_LEVEL_FILE).json --pcf ../$(PINOUT_FILE) --asc $(TOP_LEVEL_FILE).asc $(FORCE)
 
 # Generar Bitstream
 bitstream:

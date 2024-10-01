@@ -8,9 +8,7 @@
 module FSM_I2C_FIFO_UART #(
     parameter DATA_DEPTH = 8, 
     DIV_BITS = 16, 
-    DIV_CLK_NUMBER=14,//170, 
-    SEND_SENSOR_DATA = 60, 
-    RESET_FSM = 126,
+    DIV_CLK_NUMBER=170, 
     NBYTES = 0,                        //El i2c_master empieza a contar desde el cero (0=leer una vez)
     ADDR_SLAVE_READ = 79,
     ADDR_SLAVE_WRITE = 78,
@@ -99,6 +97,76 @@ wire w_scl_oe;
 wire w_scl_o;
 wire w_scl_i;
 
+//--------------------------------------------------------------------------------------------
+//UART_FSM
+//--------------------------------------------------------------------------------------------
+
+/*
+
+                                         __________
+                                        |          |
+                 i_uart_recived_data--->|          |
+                i_uart_recived_valid--->|          |
+           o_uart_recived_data_ready<---|          |
+                                        |   UART   |--->o_fifo0_data_out_extracted
+                    o_uart_send_data<---|   FSM    |<---i_fifo0_data_out_valid_to_extract
+                   o_uart_send_valid<---|          |<---i_fifo0_data_out
+              i_uart_send_data_ready--->|          |
+                                        |          |
+                                        |__________|             
+            
+*/
+
+//-------------------
+//wires and registers
+//-------------------
+
+wire [DATA_DEPTH-1:0] w_uart_fsm_recived_data;
+wire w_uart_recived_valid;
+wire w_uart_recived_data_ready;
+
+wire [DATA_DEPTH-1:0] w_uart_send_data;
+wire w_uart_send_valid;
+wire w_uart_send_data_ready;
+
+wire [DATA_DEPTH-1:0] w_uart_recived_data;
+
+//--------------------------------------------------------------------------------------------
+//UART
+//--------------------------------------------------------------------------------------------
+
+/*
+
+              __________
+             |          |
+    i_rxd--->|          |--->o_data
+    o_txd<---|          |--->o_valid
+             |          |<---i_ready
+             |          |
+             |   UART   |<---i_data
+             |          |<---i_valid
+             |          |--->o_ready
+  o_rxerr<---|          |
+             |__________|             
+            
+*/
+
+//-------------------
+//wires and registers
+//-------------------
+
+reg [DIV_BITS-1:0] r_div = DIV_CLK_NUMBER;
+
+
+wire w_rxerr;
+
+//--------------------------------------------------------------------------------------------
+//UART and FIFO LOGIC
+//--------------------------------------------------------------------------------------------
+
+reg [31:0] r_counter = 26000050;
+reg r_led_status;
+
 fsm_i2c_fifo #(
     .DATA_DEPTH(DATA_DEPTH),  
     .NBYTES(NBYTES),                        //El i2c_master empieza a contar desde el cero (0=leer una vez)
@@ -156,18 +224,6 @@ fsm_i2c_fifo #(
             
 */
 
-//-------------------
-//wires and registers
-//-------------------
-
-wire [DATA_DEPTH-1:0] w_uart_recived_data;
-wire w_uart_recived_valid;
-wire w_uart_recived_data_ready;
-
-wire [DATA_DEPTH-1:0] w_uart_send_data;
-wire w_uart_send_valid;
-wire w_uart_send_data_ready;
-
 UART_FSM #(.DATA_DEPTH(DATA_DEPTH),
     .DATA_SENSOR0(DATA_SENSOR0),
     .DATA_SENSOR1(DATA_SENSOR1),
@@ -190,7 +246,7 @@ UART_FSM (
     .i_clk(i_clk),
     .i_rst(i_rst),
 
-    .i_uart_recived_data(w_uart_recived_data),
+    .i_uart_recived_data(w_uart_fsm_recived_data),
     .i_uart_recived_valid(w_uart_recived_valid),
     .o_uart_recived_data_ready(w_uart_recived_data_ready),
 
@@ -224,24 +280,6 @@ UART_FSM (
             
 */
 
-//-------------------
-//wires and registers
-//-------------------
-
-reg [DIV_BITS-1:0] r_div = DIV_CLK_NUMBER;
-reg [DATA_DEPTH-1:0] r_uart_recived_data;
-reg [DATA_DEPTH-1:0] r_uart_send_data;
-
-reg r_uart_recived_valid;
-reg r_uart_recived_valid_prev;
-reg r_uart_recived_data_ready;
-
-reg r_uart_send_valid;
-reg r_uart_send_data_ready;
-reg r_flag;
-
-wire w_rxerr;
-
 uart #(.DIV_BITS(DIV_BITS)) uart(
     .i_clk(i_clk),
     .i_rst(i_rst),
@@ -263,8 +301,15 @@ uart #(.DIV_BITS(DIV_BITS)) uart(
 
 );
 
+assign w_uart_fsm_recived_data[0] = w_uart_recived_data[7];
+assign w_uart_fsm_recived_data[1] = w_uart_recived_data[6];
+assign w_uart_fsm_recived_data[2] = w_uart_recived_data[5];
+assign w_uart_fsm_recived_data[3] = w_uart_recived_data[4];
+assign w_uart_fsm_recived_data[4] = w_uart_recived_data[3];
+assign w_uart_fsm_recived_data[5] = w_uart_recived_data[2];
+assign w_uart_fsm_recived_data[6] = w_uart_recived_data[1];
+assign w_uart_fsm_recived_data[7] = w_uart_recived_data[0];
 /*
-
 //--------------------------------------------------------------------------------------------
 //SB_IO Instantiation
 //--------------------------------------------------------------------------------------------
@@ -278,6 +323,7 @@ reg r_latch_input_value = 1'b0;
 
 wire w_package_pin_scl;
 wire w_package_pin_sda;
+
 
 assign w_package_pin_scl = scl;
 assign w_package_pin_sda = sda;
@@ -360,8 +406,8 @@ defparam IO_PIN_SCL_INST.IO_STANDARD = "SB_LVCMOS";
 //--------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------
 
+
 */
-/*
 
 //Metodo para simular
 
@@ -370,16 +416,10 @@ assign w_sda_i = sda;
 assign scl = w_scl_o;
 assign w_scl_i = scl;
 
-*/
-
-//assign w_fsm_rst = w_uart_fsm_fsm_rst | i_rst;
 
 //--------------------------------------------------------------------------------------------
 //UART and FIFO LOGIC
 //--------------------------------------------------------------------------------------------
-
-reg [31:0] r_counter = 26000050;
-reg r_led_status;
 
 always @(posedge i_clk or posedge i_rst) begin
     if(i_rst) begin
