@@ -4,7 +4,7 @@
 `include "../fifo/interface/fifo.v"
 `include "../fifo/ram_dualport.v"
 
-module fsm_i2c_fifo #(
+module FSM_I2C_FIFO #(
     parameter DATA_DEPTH = 8,  
     NBYTES = 0,                        //El i2c_master empieza a contar desde el cero (0=leer una vez)
     ADDR_SLAVE_READ = 79,
@@ -17,30 +17,29 @@ module fsm_i2c_fifo #(
     ADDR_LENGTH = 8,
     //i2c master
     CLK_DIV = 16,
-    CLK_DIV_REG_BITS = 24
+    CLK_DIV_REG_BITS = 24,
+    COUNTER_ACK_LIMIT = 25,
+    COUNTER_CONFIG_LIMIT = 25
 ) (
     input i_clk,
     input i_rst,
     input i_fsm_rst,
 
-    //strict input lines
-    input i_sda_in,
-    input i_scl_in,
-    
-    //tristate buffers separate lines
-    output reg o_sda_oe,
-    output reg o_scl_oe,
+    inout sda,
+    inout scl,
 
-    //strict output lines
-    output reg o_sda_out,
-    output reg o_scl_out,
+    output reg o_led_fsm_err,
 
     input i_fifo_data_out_extracted,
-    output reg o_fifo_data_out_valid_to_extract,
-    output reg [DATA_DEPTH-1:0] o_fifo_data_out
+    output o_fifo_data_out_valid_to_extract,
+    output [DATA_DEPTH-1:0] o_fifo_data_out,
+
+    output o_fifo_empty,
+
+    output reg o_borrar
 
 );
-    
+
 //--------------------------------------------------------------------------------------------
 //FSM and I2C master
 //--------------------------------------------------------------------------------------------
@@ -74,7 +73,6 @@ wire w_data_write_valid;
 //FSM fifo interface
 wire w_fifo_full;
 wire w_fifo_empty;
-wire w_led_fsm_err;
 
 //-------------------
 //Modules
@@ -89,7 +87,9 @@ FSM #(
     .CONFIG_REGISTER_READ(CONFIG_REGISTER_READ),          //el valor real del sensor de temperatura es 0x09 para escribir y 0x03 para leer
     .CONFIG_REGISTER_DATA(CONFIG_REGISTER_DATA),
     .SENSOR_DATA(SENSOR_DATA),
-    .SENSOR_DECIMAL_FRACTION_DATA(SENSOR_DECIMAL_FRACTION_DATA)
+    .SENSOR_DECIMAL_FRACTION_DATA(SENSOR_DECIMAL_FRACTION_DATA),
+    .COUNTER_ACK_LIMIT(COUNTER_ACK_LIMIT),
+    .COUNTER_CONFIG_LIMIT(COUNTER_CONFIG_LIMIT)
     ) 
     FSM(
     .i_clk(i_clk), 
@@ -127,7 +127,9 @@ FSM #(
     .o_data_in_valid(w_data_in_valid),
 
     .i_fifo_full(w_fifo_full),
-    .o_err(w_led_fsm_err)
+    .o_err(o_led_fsm_err),
+
+    .o_borrar(o_borrar)
 );
 
 i2c_master_oe #(.DATA_DEPTH(DATA_DEPTH), .CLK_DIV(CLK_DIV), .CLK_DIV_REG_BITS(CLK_DIV_REG_BITS)) 
@@ -161,16 +163,16 @@ i2c_master(
     //of io ports
 
     //strict input lines
-    .i_sda_in(i_sda_in),
-    .i_scl_in(i_scl_in),
+    .i_sda_in(w_sda_i),
+    .i_scl_in(w_scl_i),
     
     //tristate buffers separate lines
-    .o_sda_oe(o_sda_oe),
-    .o_scl_oe(o_scl_oe),
+    .o_sda_oe(w_sda_oe),
+    .o_scl_oe(w_scl_oe),
 
     //strict output lines
-    .o_sda_out(o_sda_out),
-    .o_scl_out(o_scl_out),
+    .o_sda_out(w_sda_o),
+    .o_scl_out(w_scl_o),
     
     .o_nak(w_nak)
 );
@@ -213,16 +215,123 @@ fifo(
     .i_ready_out(i_fifo_data_out_extracted),
 
     .o_full(w_fifo_full),
-    .o_empty(w_fifo_empty)
+    .o_empty(o_fifo_empty)
 );
 
-always @(posedge i_clk or posedge i_rst) begin
-    if(i_rst) begin
-    
-    end
-    else begin
-        r_fsm_addr_bits <= r_i2c_master_addr_bits;
-    end
-end
+//--------------------------------------------------------------------------------------------
+//SB_IO Instantiation
+//--------------------------------------------------------------------------------------------
+
+wire w_sda_oe;
+wire w_sda_o;
+wire w_sda_i;
+
+wire w_scl_oe;
+wire w_scl_o;
+wire w_scl_i;
+
+wire w_clock_enable;
+wire w_d_out_0;
+wire w_d_in_0;
+wire w_d_out_1;
+wire w_d_in_1;
+reg r_latch_input_value = 1'b0;
+
+wire w_package_pin_scl;
+wire w_package_pin_sda;
+
+
+assign w_package_pin_scl = scl;
+assign w_package_pin_sda = sda;
+
+/*
+
+//Metodo para simular
+
+assign sda = w_sda_oe ? w_sda_o : 1'bz;
+assign w_sda_i = sda;
+assign scl = w_scl_o;
+assign w_scl_i = scl;
+
+*/
+
+//-------
+//SDA pin
+//-------
+
+SB_IO
+IO_PIN_SDA_INST
+(
+.PACKAGE_PIN (w_package_pin_sda),                 // User’s Pin signal name
+.LATCH_INPUT_VALUE (r_latch_input_value),     // Latches/holds the Input value
+.CLOCK_ENABLE (w_clock_enable),             // Clock Enable common to input and output clock
+.INPUT_CLK (i_clk),                         // Clock for the input registers
+.OUTPUT_CLK (i_clk),                        // Clock for the output registers
+.OUTPUT_ENABLE (w_sda_oe),                  // Output Pin Tristate/Enable control
+.D_OUT_0 (w_sda_o),                         // Data 0 – out to Pin/Rising clk edge
+.D_OUT_1 (w_d_out_0),                         // Data 1 - out to Pin/Falling clk edge
+.D_IN_0 (w_sda_i),                           // Data 0 - Pin input/Rising clk edge
+.D_IN_1 (w_d_in_0)                            // Data 1 – Pin input/Falling clk edge
+); // synthesis DRIVE_STRENGTH= x2
+
+defparam IO_PIN_SDA_INST.PIN_TYPE = 6'b101001;
+// See Input and Output Pin Function Tables.
+// Default value of PIN_TYPE = 6’000000 i.e.
+// an input pad, with the input signal
+// registered.
+defparam IO_PIN_SDA_INST.PULLUP = 1'b0;
+// By default, the IO will have NO pull up.
+// This parameter is used only on bank 0, 1,
+// and 2. Ignored when it is placed at bank 3
+defparam IO_PIN_SDA_INST.NEG_TRIGGER = 1'b0;
+// Specify the polarity of all FFs in the IO to
+// be falling edge when NEG_TRIGGER = 1.
+// Default is rising edge.
+defparam IO_PIN_SDA_INST.IO_STANDARD = "SB_LVCMOS";
+// Other IO standards are supported in bank 3
+// only: SB_SSTL2_CLASS_2, SB_SSTL2_CLASS_1,
+// SB_SSTL18_FULL, SB_SSTL18_HALF, SB_MDDR10,
+// SB_MDDR8, SB_MDDR4, SB_MDDR2 etc.
+
+//-------
+//SCL pin
+//-------
+
+SB_IO
+IO_PIN_SCL_INST
+(
+.PACKAGE_PIN (w_package_pin_scl),                 // User’s Pin signal name
+.LATCH_INPUT_VALUE (r_latch_input_value),     // Latches/holds the Input value
+.CLOCK_ENABLE (w_clock_enable),             // Clock Enable common to input and output clock
+.INPUT_CLK (i_clk),                         // Clock for the input registers
+.OUTPUT_CLK (i_clk),                        // Clock for the output registers
+.OUTPUT_ENABLE (w_scl_oe),                  // Output Pin Tristate/Enable control
+.D_OUT_0 (w_scl_o),                         // Data 0 – out to Pin/Rising clk edge
+.D_OUT_1 (w_d_out_1),                         // Data 1 - out to Pin/Falling clk edge
+.D_IN_0 (w_scl_i),                           // Data 0 - Pin input/Rising clk edge
+.D_IN_1 (w_d_in_1)                            // Data 1 – Pin input/Falling clk edge
+); //synthesis DRIVE_STRENGTH= x2
+defparam IO_PIN_SCL_INST.PIN_TYPE = 6'b101001;
+// See Input and Output Pin Function Tables.
+// Default value of PIN_TYPE = 6’000000 i.e.
+// an input pad, with the input signal
+// registered.
+defparam IO_PIN_SCL_INST.PULLUP = 1'b0;
+// By default, the IO will have NO pull up.
+// This parameter is used only on bank 0, 1,
+// and 2. Ignored when it is placed at bank 3
+defparam IO_PIN_SCL_INST.NEG_TRIGGER = 1'b0;
+// Specify the polarity of all FFs in the IO to
+// be falling edge when NEG_TRIGGER = 1.
+// Default is rising edge.
+defparam IO_PIN_SCL_INST.IO_STANDARD = "SB_LVCMOS";
+// Other IO standards are supported in bank 3
+// only: SB_SSTL2_CLASS_2, SB_SSTL2_CLASS_1,
+// SB_SSTL18_FULL, SB_SSTL18_HALF, SB_MDDR10,
+// SB_MDDR8, SB_MDDR4, SB_MDDR2 etc.
+
+//--------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------
+
 
 endmodule

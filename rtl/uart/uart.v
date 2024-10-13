@@ -7,7 +7,7 @@ module uart #(
     input [DIV_BITS-1:0] i_div,
 
     input i_rxd,
-    output reg o_txd,
+    output o_txd,
 
     output [8-1:0] o_data,
     output o_valid,

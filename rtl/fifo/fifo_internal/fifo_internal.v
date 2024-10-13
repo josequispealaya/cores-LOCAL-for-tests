@@ -39,7 +39,7 @@ RAM_DUALPORT #(ADDR_LENGTH, WORD_LENGTH) memory (
     .r_data_out(o_data_out)
 );
 
-always @(posedge i_clk) begin
+always @(posedge i_clk or posedge i_reset) begin
     if(i_reset == 1) begin
         r_addr <= {ADDR_LENGTH{1'b0}};
         w_addr <= {ADDR_LENGTH{1'b0}};

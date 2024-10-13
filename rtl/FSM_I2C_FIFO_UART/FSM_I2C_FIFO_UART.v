@@ -10,17 +10,19 @@ module FSM_I2C_FIFO_UART #(
     DIV_BITS = 16, 
     DIV_CLK_NUMBER=170, 
     NBYTES = 0,                        //El i2c_master empieza a contar desde el cero (0=leer una vez)
-    ADDR_SLAVE_READ = 79,
-    ADDR_SLAVE_WRITE = 78,
-    CONFIG_REGISTER_WRITE = 3,         //A modo de prueba se cambio el valor para que sea el mismo y se pueda comprobar
+    ADDR_SLAVE_READ = 157,
+    ADDR_SLAVE_WRITE = 156,
+    CONFIG_REGISTER_WRITE = 9,         //A modo de prueba se cambio el valor para que sea el mismo y se pueda comprobar
     CONFIG_REGISTER_READ = 3,          //el valor real del sensor de temperatura es 0x09 para escribir y 0x03 para leer
     CONFIG_REGISTER_DATA = 4,
     SENSOR_DATA = 0,
     SENSOR_DECIMAL_FRACTION_DATA = 15,
     ADDR_LENGTH = 8,
+    COUNTER_ACK_LIMIT = 25,
+    COUNTER_CONFIG_LIMIT = 25,
 
     //i2c master
-    CLK_DIV = 16,
+    CLK_DIV = 65,                   // 26000000/(65*4) = 100000 Hz
     CLK_DIV_REG_BITS = 24,
 
     //UART_FSM
@@ -45,10 +47,16 @@ module FSM_I2C_FIFO_UART #(
     input i_rst,
 
     input i_rx,
-    output reg o_tx,
+    output o_tx,
 
     output reg o_led_status,    //Para verificar que la FPGA siga funcionando
-    output reg o_led_uart_err,
+/*    output o_led_uart_err,
+    output o_led_fsm_error,
+    output o_led_fifo_err,
+    output o_led_borar,
+*/
+
+    output [7:0] o_leds,
 
     inout sda,            //Para simulacion hay assign comentados mas abajo)
     inout scl
@@ -74,6 +82,9 @@ module FSM_I2C_FIFO_UART #(
             
 */
 
+wire [7:0] w_leds;
+
+assign o_leds = w_leds;
 
 //-------------------
 //wires and registers
@@ -131,6 +142,8 @@ wire w_uart_send_data_ready;
 
 wire [DATA_DEPTH-1:0] w_uart_recived_data;
 
+wire w_fifo_empty;
+
 //--------------------------------------------------------------------------------------------
 //UART
 //--------------------------------------------------------------------------------------------
@@ -157,7 +170,6 @@ wire [DATA_DEPTH-1:0] w_uart_recived_data;
 
 reg [DIV_BITS-1:0] r_div = DIV_CLK_NUMBER;
 
-
 wire w_rxerr;
 
 //--------------------------------------------------------------------------------------------
@@ -167,7 +179,7 @@ wire w_rxerr;
 reg [31:0] r_counter = 26000050;
 reg r_led_status;
 
-fsm_i2c_fifo #(
+FSM_I2C_FIFO #(
     .DATA_DEPTH(DATA_DEPTH),  
     .NBYTES(NBYTES),                        //El i2c_master empieza a contar desde el cero (0=leer una vez)
     .ADDR_SLAVE_READ(ADDR_SLAVE_READ),
@@ -180,26 +192,26 @@ fsm_i2c_fifo #(
     .ADDR_LENGTH(ADDR_LENGTH),
     //i2c master
     .CLK_DIV(CLK_DIV),
-    .CLK_DIV_REG_BITS(CLK_DIV_REG_BITS)
-) fsm_i2c_fifo (
+    .CLK_DIV_REG_BITS(CLK_DIV_REG_BITS),
+    .COUNTER_ACK_LIMIT(COUNTER_ACK_LIMIT),
+    .COUNTER_CONFIG_LIMIT(COUNTER_CONFIG_LIMIT)
+) FSM_I2C_FIFO (
     .i_clk(i_clk),
     .i_rst(i_rst),
     .i_fsm_rst(w_fsm_rst),
 
-    .i_sda_in(w_sda_i),
-    .i_scl_in(w_scl_i),
-    
-    //tristate buffers separate lines
-    .o_sda_oe(w_sda_oe),
-    .o_scl_oe(w_scl_oe),
+    .sda(sda),
+    .scl(scl),
 
-    //strict output lines
-    .o_sda_out(w_sda_o),
-    .o_scl_out(w_scl_o),
+    .o_led_fsm_err(o_led_fsm_error),
 
     .i_fifo_data_out_extracted(w_fifo_data_out_extracted),
     .o_fifo_data_out_valid_to_extract(w_fifo_data_out_valid_to_extract),
-    .o_fifo_data_out(w_fifo_data_out)
+    .o_fifo_data_out(w_fifo_data_out),
+
+    .o_fifo_empty(w_fifo_empty),
+
+    .o_borrar(o_led_borar)
 
 );
 
@@ -257,7 +269,10 @@ UART_FSM (
     .o_fifo0_data_out_extracted(w_fifo_data_out_extracted),
     .i_fifo0_data_out_valid_to_extract(w_fifo_data_out_valid_to_extract),
     .i_fifo0_data_out(w_fifo_data_out),
-    .o_fsm_rst(w_fsm_rst)
+    .o_fsm_rst(w_fsm_rst),
+    .i_fifo_empty(w_fifo_empty),
+    
+    .o_leds(w_leds)
 );
 
 //--------------------------------------------------------------------------------------------
@@ -301,14 +316,14 @@ uart #(.DIV_BITS(DIV_BITS)) uart(
 
 );
 
-assign w_uart_fsm_recived_data[0] = w_uart_recived_data[7];
-assign w_uart_fsm_recived_data[1] = w_uart_recived_data[6];
-assign w_uart_fsm_recived_data[2] = w_uart_recived_data[5];
-assign w_uart_fsm_recived_data[3] = w_uart_recived_data[4];
-assign w_uart_fsm_recived_data[4] = w_uart_recived_data[3];
-assign w_uart_fsm_recived_data[5] = w_uart_recived_data[2];
-assign w_uart_fsm_recived_data[6] = w_uart_recived_data[1];
-assign w_uart_fsm_recived_data[7] = w_uart_recived_data[0];
+assign w_uart_fsm_recived_data[0] = w_uart_recived_data[0];
+assign w_uart_fsm_recived_data[1] = w_uart_recived_data[1];
+assign w_uart_fsm_recived_data[2] = w_uart_recived_data[2];
+assign w_uart_fsm_recived_data[3] = w_uart_recived_data[3];
+assign w_uart_fsm_recived_data[4] = w_uart_recived_data[4];
+assign w_uart_fsm_recived_data[5] = w_uart_recived_data[5];
+assign w_uart_fsm_recived_data[6] = w_uart_recived_data[6];
+assign w_uart_fsm_recived_data[7] = w_uart_recived_data[7];
 /*
 //--------------------------------------------------------------------------------------------
 //SB_IO Instantiation
@@ -409,12 +424,7 @@ defparam IO_PIN_SCL_INST.IO_STANDARD = "SB_LVCMOS";
 
 */
 
-//Metodo para simular
-
-assign sda = w_sda_oe ? w_sda_o : 1'bz;
-assign w_sda_i = sda;
-assign scl = w_scl_o;
-assign w_scl_i = scl;
+assign o_led_fifo_err = w_fifo_empty;
 
 
 //--------------------------------------------------------------------------------------------
@@ -428,16 +438,16 @@ always @(posedge i_clk or posedge i_rst) begin
     else begin
 
         if(r_counter <= 50) begin
-            r_led_status = ~r_led_status;
-            r_counter = 26000050;
+            r_led_status <= ~r_led_status;
+            r_counter <= 26000050;
         end
         else begin
-            r_counter = r_counter - 1;
+            r_counter <= r_counter - 1;
         end
 
     end
 
-    o_led_status = r_led_status;
+    o_led_status <= r_led_status;
 
 end
 

@@ -46,6 +46,7 @@ always @(posedge i_clk or posedge i_rst) begin
         r_state = S_IDLE;
         o_valid = 1'b1;
         o_data = 0;
+        o_err = 0;
 
     end else begin
 

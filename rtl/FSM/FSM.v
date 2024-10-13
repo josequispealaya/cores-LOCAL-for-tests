@@ -1,13 +1,15 @@
 module FSM #(
      parameter DATA_DEPTH = 8,
      parameter NBYTES = 0,                        //El i2c_master empieza a contar desde el cero (0<=leer una vez)
-     parameter ADDR_SLAVE_READ = 79,
-     parameter ADDR_SLAVE_WRITE = 78,
-     parameter CONFIG_REGISTER_WRITE = 3,         //A modo de prueba se cambio el valor para que sea el mismo y se pueda comprobar
+     parameter ADDR_SLAVE_READ = 157,
+     parameter ADDR_SLAVE_WRITE = 156,
+     parameter CONFIG_REGISTER_WRITE = 9,         //A modo de prueba se cambio el valor para que sea el mismo y se pueda comprobar
      parameter CONFIG_REGISTER_READ = 3,          //el valor real del sensor de temperatura es 0x09 para escribir y 0x03 para leer
      parameter CONFIG_REGISTER_DATA = 4,
      parameter SENSOR_DATA = 0,
-     parameter SENSOR_DECIMAL_FRACTION_DATA = 15
+     parameter SENSOR_DECIMAL_FRACTION_DATA = 15,
+     parameter COUNTER_ACK_LIMIT = 25,
+     parameter COUNTER_CONFIG_LIMIT = 25
 )(
      input i_clk, 
      input i_rst,
@@ -46,7 +48,9 @@ module FSM #(
      output reg o_data_in_valid,
 
      input i_fifo_full,
-     output reg o_err
+     output reg o_err,
+
+     output reg o_borrar
 );
 
 //Registro para los estados
@@ -54,14 +58,29 @@ reg [2:0] r_state;
 reg [2:0] r_nstate;
 
 //Contadores
-reg [3:0] r_counterAck;
-reg [3:0] r_counterConfig;
-reg [2:0] r_i2c_load_data_contr;
+reg [7:0] r_counterAck;
+reg [7:0] r_counterConfig;
+reg [7:0] r_i2c_load_data_contr;
+reg [4:0] r_borrar;
 
 //Otros registros
 reg r_prev_nak;
-reg [2:0] r_prev_contr;
+reg [7:0] r_prev_contr;
 reg r_get_decimal_fraction;
+reg r_prev_data_write_ready;
+
+//Salidas
+reg r_start;
+reg [DATA_DEPTH-1:0] r_addr_bits;
+reg r_addr_valid;
+reg [DATA_DEPTH-1:0] r_nbytes_bits;
+reg r_nbytes_valid;
+reg r_data_read_ready;
+reg [DATA_DEPTH-1:0] r_data_write_bits;
+reg r_data_write_valid;
+reg [DATA_DEPTH-1:0] r_data_in;
+reg r_data_in_valid;
+reg r_err;
 
 //Estados
 localparam ADDR=0, CONFIGUWRITE=1, CONFIGREAD=2, READING=3, NORESPOND=4, RESET=5;
@@ -75,229 +94,25 @@ localparam  LOAD_ADDR =      'd0,
             LOAD_DATA =      'd4,
             CHANGE_VALID =   'd5,
             SAVE_DATA =      'd6,
-            IDLE =           'd7
+            WAIT_SAVE_DATA = 'd7,
+            IDLE =           'd8
 ;
 
 localparam NONE=0;
 
 //Logica de las salidas
-
-always @(r_state or r_i2c_load_data_contr)
-     begin
-          case (r_state)
-               ADDR: begin
-                    case (r_i2c_load_data_contr) 
-                         LOAD_ADDR: begin
-                              o_addr_bits <= ADDR_SLAVE_READ;
-                              o_addr_valid <= 1;
-                              o_start <= 1;
-                         end
-                         LOAD_REG: begin
-                              o_start <= 0;                       //Para generar un pulso del start ya que a este estado ingreso luego de LOAD_ADDR
-                              o_data_write_bits <= SENSOR_DATA; 
-                              o_data_write_valid <= 1;
-                         end
-                         CHANGE_VALID: begin
-                              o_data_write_valid <= 0;
-                              o_addr_valid <= 0;
-                         end
-                         LOAD_NBYTES: begin
-                              o_nbytes_bits <= NBYTES;
-                              o_addr_bits <= ADDR_SLAVE_READ;
-                              o_addr_valid <= 1;
-                              o_nbytes_valid <= 1;
-                         end
-                         ANALYSE_DATA: begin
-                              o_addr_bits <= NONE;
-                              o_addr_valid <= 0;
-                              o_nbytes_bits <= NONE;
-                              o_nbytes_valid <= 0;
-                              o_data_write_bits <= NONE; 
-                              o_data_write_valid <= 0;
-                         end
-                         IDLE: begin
-                              o_addr_bits <= NONE;
-                              o_addr_valid <= 0;
-                              o_nbytes_bits <= NONE;
-                              o_nbytes_valid <= 0;
-                              o_data_write_bits <= NONE; 
-                              o_data_write_valid <= 0;
-                         end
-
-                    endcase
-               end
-               CONFIGUWRITE: begin
-                    case (r_i2c_load_data_contr)
-                         LOAD_ADDR: begin
-                              o_addr_bits <= ADDR_SLAVE_WRITE;
-                              o_addr_valid <= 1;
-                              o_start <= 1;
-                         end
-                         LOAD_REG: begin
-                              o_start <= 0;                       //Para generar un pulso del start ya que a este estado ingreso luego de LOAD_ADDR
-                              o_data_write_bits <= CONFIG_REGISTER_WRITE; 
-                              o_data_write_valid <= 1;
-                         end
-                         CHANGE_VALID: begin
-                              o_data_write_valid <= 0;
-                              o_addr_valid <= 0;
-                         end
-                         LOAD_DATA: begin
-                              o_data_write_bits <= CONFIG_REGISTER_DATA; 
-                              o_data_write_valid <= 1;
-                              o_addr_bits <= ADDR_SLAVE_WRITE;
-                              o_addr_valid <= 1;
-                         end
-                         ANALYSE_DATA: begin
-                              o_addr_bits <= NONE;
-                              o_addr_valid <= 0;
-                              o_data_write_bits <= NONE; 
-                              o_data_write_valid <= 0;
-                         end
-                         IDLE: begin
-                              o_addr_bits <= NONE;
-                              o_addr_valid <= 0;
-                              o_data_write_bits <= NONE; 
-                              o_data_write_valid <= 0;
-                         end
-
-                    endcase
-               end
-               CONFIGREAD: begin
-                    case (r_i2c_load_data_contr)
-                         LOAD_ADDR: begin
-                              o_addr_bits <= ADDR_SLAVE_READ;
-                              o_addr_valid <= 1;
-                              o_start <= 1;
-                         end
-                         LOAD_REG: begin
-                              o_start <= 0;                       //Para generar un pulso del start ya que a este estado ingreso luego de LOAD_ADDR
-                              o_data_write_bits <= CONFIG_REGISTER_READ; 
-                              o_data_write_valid <= 1;
-                         end
-                         CHANGE_VALID: begin
-                              o_data_write_valid <= 0;
-                              o_addr_valid <= 0;
-                         end
-                         LOAD_NBYTES: begin
-                              o_nbytes_bits <= NBYTES;
-                              o_addr_bits <= ADDR_SLAVE_READ;
-                              o_addr_valid <= 1;
-                              o_nbytes_valid <= 1;
-                         end
-                         ANALYSE_DATA: begin
-                              o_addr_bits <= NONE;
-                              o_addr_valid <= 0;
-                              o_nbytes_bits <= NONE;
-                              o_nbytes_valid <= 0;
-                              o_data_write_bits <= NONE; 
-                              o_data_write_valid <= 0;
-                         end
-                         IDLE: begin
-                              o_addr_bits <= NONE;
-                              o_addr_valid <= 0;
-                              o_nbytes_bits <= NONE;
-                              o_nbytes_valid <= 0;
-                              o_data_write_bits <= NONE; 
-                              o_data_write_valid <= 0;
-                         end
-                    endcase
-               end
-               READING: begin
-                    case (r_i2c_load_data_contr)
-                         LOAD_ADDR: begin
-                              o_addr_bits <= ADDR_SLAVE_READ;
-                              o_addr_valid <= 1;
-                              o_start <= 1;
-                         end
-                         LOAD_REG: begin
-                              o_start <= 0;                       //Para generar un pulso del start ya que a este estado ingreso luego de LOAD_ADDR
-                              if(!r_get_decimal_fraction) begin
-                                   o_data_write_bits <= SENSOR_DATA;
-                              end
-                              else begin
-                                   o_data_write_bits <= SENSOR_DECIMAL_FRACTION_DATA;
-                              end
-                              o_data_write_valid <= 1;
-                         end
-                         CHANGE_VALID: begin
-                              o_data_write_valid <= 0;
-                              o_addr_valid <= 0;
-                         end
-                         LOAD_NBYTES: begin
-                              o_nbytes_bits <= NBYTES;
-                              o_addr_bits <= ADDR_SLAVE_READ;
-                              o_addr_valid <= 1;
-                              o_nbytes_valid <= 1;
-                         end
-                         ANALYSE_DATA: begin
-                              o_addr_bits <= NONE;
-                              o_addr_valid <= 0;
-                              o_nbytes_bits <= NONE;
-                              o_nbytes_valid <= 0;
-                              o_data_write_bits <= NONE; 
-                              o_data_write_valid <= 0;
-                              if(i_fifo_full) begin
-                                   o_data_in_valid <= 0;          //*****
-                              end
-                              else begin
-                                   o_data_in_valid <= 1;          //*****
-                              end
-                              
-                         end
-                         SAVE_DATA: begin
-                              o_data_in <= i_data_read_bits; //*****
-                         end
-                         IDLE: begin
-                              o_addr_bits <= NONE;
-                              o_addr_valid <= 0;
-                              o_nbytes_bits <= NONE;
-                              o_nbytes_valid <= 0;
-                              o_data_write_bits <= NONE; 
-                              o_data_write_valid <= 0;
-                              o_data_in <= NONE;
-                              o_data_in_valid <= 0;
-                         end
-                    endcase
-               end
-               NORESPOND: begin
-                    o_start <= 0;
-                    o_addr_bits <= NONE;
-                    o_addr_valid <= 0;
-                    o_nbytes_bits <= NONE;
-                    o_nbytes_valid <= 0;
-                    o_data_read_ready <= 0;
-                    o_data_write_bits <= NONE;
-                    o_data_write_valid <= 0;
-                    o_err <= 1;
-               end
-               RESET: begin
-                    o_start <= 0;
-                    o_addr_bits <= NONE;
-                    o_addr_valid <= 0;
-                    o_nbytes_bits <= NONE;
-                    o_nbytes_valid <= 0;
-                    o_data_read_ready <= 0;
-                    o_data_write_bits <= NONE;
-                    o_data_write_valid <= 0;
-                    o_data_in <= NONE;
-                    o_data_in_valid <= 0;
-                    o_err <= 0;
-               end
-               default: begin
-                    o_start <= 0;
-                    o_addr_bits <= NONE;
-                    o_addr_valid <= 0;
-                    o_nbytes_bits <= NONE;
-                    o_nbytes_valid <= 0;
-                    o_data_read_ready <= 0;
-                    o_data_write_bits <= NONE;
-                    o_data_write_valid <= 0;
-                    o_data_in <= NONE;
-                    o_data_in_valid <= 0;
-               end
-          endcase
-     end
+assign o_start = r_start;
+assign o_addr_bits = r_addr_bits;
+assign o_addr_valid = r_addr_valid;
+assign o_nbytes_bits = r_nbytes_bits;
+assign o_nbytes_valid = r_nbytes_valid;
+assign o_data_read_ready = r_data_read_ready;
+assign o_data_write_bits = r_data_write_bits;
+assign o_data_write_valid = r_data_write_valid;
+assign o_data_in = r_data_in;
+assign o_data_in_valid = r_data_in_valid;
+assign o_err = r_err;
+assign o_borrar = r_borrar[4];
 
 //Logica de la maquina de estados
 
@@ -312,6 +127,7 @@ always @(posedge i_clk or posedge i_rst)
                r_prev_nak <= 0;
                r_prev_contr <= IDLE;
                r_get_decimal_fraction <= 1'b0;
+               r_borrar <= 0;
           end
           else if (i_force_rst) begin
                r_state <= RESET;
@@ -322,11 +138,12 @@ always @(posedge i_clk or posedge i_rst)
                r_prev_nak <= 0;
                r_prev_contr <= IDLE;
                r_get_decimal_fraction <= 1'b0;
+               r_borrar <= 0;
           end
           else begin
           
                r_state <= r_nstate;
-          
+
                case (r_state)
                     ADDR: begin
                          
@@ -362,9 +179,48 @@ always @(posedge i_clk or posedge i_rst)
                               r_prev_nak <= i_nak;
                          end
 
-                         if(r_counterAck >= 10 & i_addr_ready) begin
+                         if(r_counterAck >= COUNTER_ACK_LIMIT & i_addr_ready) begin
                               r_nstate <= NORESPOND;
                          end
+
+                         case (r_i2c_load_data_contr) 
+                              LOAD_ADDR: begin
+                                   r_addr_bits <= ADDR_SLAVE_READ;
+                                   r_addr_valid <= 1;
+                                   r_start <= 1;
+                              end
+                              LOAD_REG: begin
+                                   r_start <= 0;                       //Para generar un pulso del start ya que a este estado ingreso luego de LOAD_ADDR
+                                   r_data_write_bits <= SENSOR_DATA; 
+                                   r_data_write_valid <= 1;
+                              end
+                              CHANGE_VALID: begin
+                                   r_data_write_valid <= 0;
+                                   r_addr_valid <= 0;
+                              end
+                              LOAD_NBYTES: begin
+                                   r_nbytes_bits <= NBYTES;
+                                   r_addr_bits <= ADDR_SLAVE_READ;
+                                   r_addr_valid <= 1;
+                                   r_nbytes_valid <= 1;
+                              end
+                              ANALYSE_DATA: begin
+                                   r_addr_bits <= NONE;
+                                   r_addr_valid <= 0;
+                                   r_nbytes_bits <= NONE;
+                                   r_nbytes_valid <= 0;
+                                   r_data_write_bits <= NONE; 
+                                   r_data_write_valid <= 0;
+                              end
+                              IDLE: begin
+                                   r_addr_bits <= NONE;
+                                   r_addr_valid <= 0;
+                                   r_nbytes_bits <= NONE;
+                                   r_nbytes_valid <= 0;
+                                   r_data_write_bits <= NONE; 
+                                   r_data_write_valid <= 0;
+                              end
+                         endcase
                          
                     end
 
@@ -373,7 +229,7 @@ always @(posedge i_clk or posedge i_rst)
                          if(i_addr_ready & (r_i2c_load_data_contr==IDLE)) begin
                               r_i2c_load_data_contr <= LOAD_ADDR;
                          end
-                         else if(r_i2c_load_data_contr==LOAD_ADDR & i_data_write_ready) begin
+                         else if(r_i2c_load_data_contr==LOAD_ADDR & i_data_write_ready & !r_prev_data_write_ready) begin
                               r_i2c_load_data_contr <= LOAD_REG;
                               r_prev_contr <= LOAD_ADDR;
                          end
@@ -381,7 +237,7 @@ always @(posedge i_clk or posedge i_rst)
                               r_i2c_load_data_contr <= CHANGE_VALID;
                               if(r_prev_contr!=CHANGE_VALID) r_prev_contr <= LOAD_REG;
                          end
-                         else if(r_i2c_load_data_contr==CHANGE_VALID & i_data_write_ready & r_prev_contr==LOAD_REG) begin
+                         else if(r_i2c_load_data_contr==CHANGE_VALID & i_data_write_ready  & !r_prev_data_write_ready & r_prev_contr==LOAD_REG) begin
                               r_i2c_load_data_contr <= LOAD_DATA;
                               r_prev_contr <= CHANGE_VALID;
                          end
@@ -405,13 +261,49 @@ always @(posedge i_clk or posedge i_rst)
                               r_prev_nak <= i_nak;
                          end
 
-                         if(r_counterAck >= 10 & i_addr_ready) begin
+                         if(r_counterAck >= COUNTER_ACK_LIMIT & i_addr_ready) begin
                               r_nstate <= NORESPOND;
                          end
 
-                         if(r_counterConfig >= 10 & i_addr_ready) begin
+                         if(r_counterConfig >= COUNTER_CONFIG_LIMIT & i_addr_ready) begin
                               r_nstate <= NORESPOND;
                          end
+
+                         case (r_i2c_load_data_contr)
+                              LOAD_ADDR: begin
+                                   r_addr_bits <= ADDR_SLAVE_WRITE;
+                                   r_addr_valid <= 1;
+                                   r_start <= 1;
+                              end
+                              LOAD_REG: begin
+                                   r_start <= 0;                       //Para generar un pulso del start ya que a este estado ingreso luego de LOAD_ADDR
+                                   r_data_write_bits <= CONFIG_REGISTER_WRITE; 
+                                   r_data_write_valid <= 1;
+                              end
+                              CHANGE_VALID: begin
+                                   r_data_write_valid <= 0;
+                                   r_addr_valid <= 0;
+                              end
+                              LOAD_DATA: begin
+                                   r_data_write_bits <= CONFIG_REGISTER_DATA; 
+                                   r_data_write_valid <= 1;
+                                   r_addr_bits <= ADDR_SLAVE_WRITE;
+                                   r_addr_valid <= 1;
+                              end
+                              ANALYSE_DATA: begin
+                                   r_addr_bits <= NONE;
+                                   r_addr_valid <= 0;
+                                   r_data_write_bits <= NONE; 
+                                   r_data_write_valid <= 0;
+                              end
+                              IDLE: begin
+                                   r_addr_bits <= NONE;
+                                   r_addr_valid <= 0;
+                                   r_data_write_bits <= NONE; 
+                                   r_data_write_valid <= 0;
+                              end
+
+                         endcase
                     end
 
                     CONFIGREAD: begin
@@ -455,13 +347,52 @@ always @(posedge i_clk or posedge i_rst)
                               r_prev_nak <= i_nak;
                          end
 
-                         if(r_counterAck >= 10 & i_addr_ready) begin
+                         if(r_counterAck >= COUNTER_ACK_LIMIT & i_addr_ready) begin
                               r_nstate <= NORESPOND;
                          end
 
-                         if(r_counterConfig >= 10 & i_addr_ready) begin
+                         if(r_counterConfig >= COUNTER_CONFIG_LIMIT & i_addr_ready) begin
                               r_nstate <= NORESPOND;
                          end
+
+                         case (r_i2c_load_data_contr)
+                              LOAD_ADDR: begin
+                                   r_addr_bits <= ADDR_SLAVE_READ;
+                                   r_addr_valid <= 1;
+                                   r_start <= 1;
+                              end
+                              LOAD_REG: begin
+                                   r_start <= 0;                       //Para generar un pulso del start ya que a este estado ingreso luego de LOAD_ADDR
+                                   r_data_write_bits <= CONFIG_REGISTER_READ; 
+                                   r_data_write_valid <= 1;
+                              end
+                              CHANGE_VALID: begin
+                                   r_data_write_valid <= 0;
+                                   r_addr_valid <= 0;
+                              end
+                              LOAD_NBYTES: begin
+                                   r_nbytes_bits <= NBYTES;
+                                   r_addr_bits <= ADDR_SLAVE_READ;
+                                   r_addr_valid <= 1;
+                                   r_nbytes_valid <= 1;
+                              end
+                              ANALYSE_DATA: begin
+                                   r_addr_bits <= NONE;
+                                   r_addr_valid <= 0;
+                                   r_nbytes_bits <= NONE;
+                                   r_nbytes_valid <= 0;
+                                   r_data_write_bits <= NONE; 
+                                   r_data_write_valid <= 0;
+                              end
+                              IDLE: begin
+                                   r_addr_bits <= NONE;
+                                   r_addr_valid <= 0;
+                                   r_nbytes_bits <= NONE;
+                                   r_nbytes_valid <= 0;
+                                   r_data_write_bits <= NONE; 
+                                   r_data_write_valid <= 0;
+                              end
+                         endcase
                          
                     end
 
@@ -469,6 +400,7 @@ always @(posedge i_clk or posedge i_rst)
 
                          if(i_addr_ready & (r_i2c_load_data_contr==IDLE)) begin
                               r_i2c_load_data_contr <= LOAD_ADDR;
+                              if(r_borrar<=25) r_borrar <= r_borrar + 1;
                          end
                          else if(r_i2c_load_data_contr==LOAD_ADDR & i_data_write_ready) begin
                               r_i2c_load_data_contr <= LOAD_REG;
@@ -482,15 +414,18 @@ always @(posedge i_clk or posedge i_rst)
                          else if(r_i2c_load_data_contr==LOAD_NBYTES & i_data_read_valid) begin
                               r_i2c_load_data_contr <= SAVE_DATA;
                          end
-                         else if(r_i2c_load_data_contr==SAVE_DATA & (i_ready_in | i_fifo_full)) begin
+                         else if((r_i2c_load_data_contr==SAVE_DATA) & (i_ready_in | i_fifo_full)) begin
                               r_i2c_load_data_contr <= ANALYSE_DATA;
                          end
-
-                         if(!i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin  
+                         else if(!i_nak & (r_i2c_load_data_contr==ANALYSE_DATA) & i_addr_ready) begin  
                               r_counterAck <= 0;
-                              r_i2c_load_data_contr <= IDLE;
+                              r_i2c_load_data_contr <= WAIT_SAVE_DATA;
                               r_get_decimal_fraction <= ~r_get_decimal_fraction;
                          end
+                         else if(r_i2c_load_data_contr==WAIT_SAVE_DATA) begin
+                              r_i2c_load_data_contr <= IDLE;
+                         end
+
                          
                          if(i_nak & !r_prev_nak) begin
                               r_nstate <= READING;
@@ -502,17 +437,113 @@ always @(posedge i_clk or posedge i_rst)
                               r_prev_nak <= i_nak;
                          end
 
-                         if(r_counterAck >= 10 & i_addr_ready) begin
+                         if((r_counterAck >= COUNTER_ACK_LIMIT) & i_addr_ready) begin
                               r_nstate <= NORESPOND;
                          end
+
+                         case (r_i2c_load_data_contr)
+                              LOAD_ADDR: begin
+                                   r_addr_bits <= ADDR_SLAVE_READ;
+                                   r_addr_valid <= 1;
+                                   r_start <= 1;
+                              end
+                              LOAD_REG: begin
+                                   r_start <= 0;                       //Para generar un pulso del start ya que a este estado ingreso luego de LOAD_ADDR
+                                   if(!r_get_decimal_fraction) begin
+                                        r_data_write_bits <= SENSOR_DATA;
+                                   end
+                                   else begin
+                                        r_data_write_bits <= SENSOR_DECIMAL_FRACTION_DATA;
+                                   end
+                                   r_data_write_valid <= 1;
+                              end
+                              CHANGE_VALID: begin
+                                   r_data_write_valid <= 0;
+                                   r_addr_valid <= 0;
+                              end
+                              LOAD_NBYTES: begin
+                                   r_nbytes_bits <= NBYTES;
+                                   r_addr_bits <= ADDR_SLAVE_READ;
+                                   r_addr_valid <= 1;
+                                   r_nbytes_valid <= 1;
+                              end
+                              ANALYSE_DATA: begin
+                                   r_addr_bits <= NONE;
+                                   r_addr_valid <= 0;
+                                   r_nbytes_bits <= NONE;
+                                   r_nbytes_valid <= 0;
+                                   r_data_write_bits <= NONE; 
+                                   r_data_write_valid <= 0;
+                                   if(i_fifo_full) begin
+                                        r_data_in_valid <= 0;          //*****
+                                   end
+                                   else begin
+                                        r_data_in_valid <= 1;          //*****
+                                   end
+                                   
+                              end
+                              SAVE_DATA: begin
+                                   r_data_in <= i_data_read_bits; //*****
+                              end
+                              WAIT_SAVE_DATA: begin
+                                   r_data_in_valid <= 0;
+                              end
+                              IDLE: begin
+                                   r_addr_bits <= NONE;
+                                   r_addr_valid <= 0;
+                                   r_nbytes_bits <= NONE;
+                                   r_nbytes_valid <= 0;
+                                   r_data_write_bits <= NONE; 
+                                   r_data_write_valid <= 0;
+                                   r_data_in <= NONE;
+                                   r_data_in_valid <= 0;
+                              end
+                         endcase
                     end
                     NORESPOND: begin
                          r_nstate <= NORESPOND;
+                         r_start <= 0;
+                         r_addr_bits <= NONE;
+                         r_addr_valid <= 0;
+                         r_nbytes_bits <= NONE;
+                         r_nbytes_valid <= 0;
+                         r_data_read_ready <= 0;
+                         r_data_write_bits <= NONE;
+                         r_data_write_valid <= 0;
+                         r_err <= 1;
                     end
                     RESET: begin
                          r_nstate <= ADDR;
+                         r_start <= 0;
+                         r_addr_bits <= NONE;
+                         r_addr_valid <= 0;
+                         r_nbytes_bits <= NONE;
+                         r_nbytes_valid <= 0;
+                         r_data_read_ready <= 0;
+                         r_data_write_bits <= NONE;
+                         r_data_write_valid <= 0;
+                         r_data_in <= NONE;
+                         r_data_in_valid <= 0;
+                         r_err <= 0;
+                    end
+                    default: begin
+                         r_state <= ADDR;
+                         r_start <= 0;
+                         r_addr_bits <= NONE;
+                         r_addr_valid <= 0;
+                         r_nbytes_bits <= NONE;
+                         r_nbytes_valid <= 0;
+                         r_data_read_ready <= 0;
+                         r_data_write_bits <= NONE;
+                         r_data_write_valid <= 0;
+                         r_data_in <= NONE;
+                         r_data_in_valid <= 0;
+                         r_err <= 0;
                     end
                endcase
+
+               r_prev_data_write_ready <= i_data_write_ready;
+
           end
      end
 

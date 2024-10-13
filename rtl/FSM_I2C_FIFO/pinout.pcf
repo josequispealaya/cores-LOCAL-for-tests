@@ -8,16 +8,16 @@
 
 # ----------------- Unconected ------------------------------------------------
 
-set_io --warn-no-port o_led_status 7
-set_io --warn-no-port U2 18
-set_io --warn-no-port U3 28
-set_io --warn-no-port U4 29
-set_io --warn-no-port U5 42
-set_io --warn-no-port U6 43
-set_io --warn-no-port U7 44
-set_io --warn-no-port U8 45
-set_io --warn-no-port U9 47
-set_io --warn-no-port U10 63
+set_io --warn-no-port i_fifo_data_out_extracted 7
+set_io --warn-no-port o_fifo_data_out_valid_to_extract 18
+set_io --warn-no-port o_fifo_data_out[0] 28
+set_io --warn-no-port o_fifo_data_out[1] 29
+set_io --warn-no-port o_fifo_data_out[2] 42
+set_io --warn-no-port o_fifo_data_out[3] 43
+set_io --warn-no-port o_fifo_data_out[4] 44
+set_io --warn-no-port o_fifo_data_out[5] 45
+set_io --warn-no-port o_fifo_data_out[6] 47
+set_io --warn-no-port o_fifo_data_out[7] 63
 set_io --warn-no-port U11 64
 set_io --warn-no-port U12 78
 set_io --warn-no-port U13 79
@@ -60,14 +60,14 @@ set_io --warn-no-port U46 139
 set_io --warn-no-port i_clk 93
 
 # ----------------- User LEDs -----------------------------------------------
-set_io --warn-no-port o_leds[0] 8
-set_io --warn-no-port o_leds[1] 9
-set_io --warn-no-port o_leds[2] 10
-set_io --warn-no-port o_leds[3] 11
-set_io --warn-no-port o_leds[4] 12
-set_io --warn-no-port o_leds[5] 15
-set_io --warn-no-port o_leds[6] 16
-set_io --warn-no-port o_leds[7] 17
+set_io --warn-no-port LED0 8
+set_io --warn-no-port LED1 9
+set_io --warn-no-port LED2 10
+set_io --warn-no-port LED3 11
+set_io --warn-no-port LED4 12
+set_io --warn-no-port LED5 15
+set_io --warn-no-port LED6 16
+set_io --warn-no-port LED7 17
 
 # ----------------- Sensors -------------------------------------------------
 
@@ -114,7 +114,7 @@ set_io --warn-no-port THERM8 144
 # ----------------- Switchs -------------------------------------------------
 
 set_io --warn-no-port i_rst 19
-set_io --warn-no-port SW7 20
+set_io --warn-no-port i_fsm_rst 20
 set_io --warn-no-port SW6 21
 set_io --warn-no-port SW5 22
 set_io --warn-no-port SW4 23
@@ -136,5 +136,5 @@ set_io --warn-no-port SCL 95
 
 # ----------------- UART ----------------------------------------------------
 
-set_io --warn-no-port o_tx 137
-set_io --warn-no-port i_rx 138
+set_io --warn-no-port TX 137
+set_io --warn-no-port RX 138
