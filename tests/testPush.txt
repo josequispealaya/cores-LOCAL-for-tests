@@ -1,2 +1,1 @@
 Esto es una prueba para que al realizar un push sobre la rama uart_verilog_draft 
-se ejecuten todos los tests: test_uartRx.py y test_uart_Tx.py
