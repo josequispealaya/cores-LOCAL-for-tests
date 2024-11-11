@@ -2,7 +2,7 @@ name: CoresTest LOCAL #Nombre del workflow
 
 on:
   push: #Acción con la que se activa, en este caso con un push en cualquier branch
-   branches: [ "uart_verilog_draft" ]
+   branches: [ "XOR-Verilog" ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
