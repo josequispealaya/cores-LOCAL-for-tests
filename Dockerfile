@@ -9,6 +9,7 @@ RUN apt update \
         iverilog=11.0-1 \
         gtkwave=3.3.104-2 \
         wget \
+    && pip3 install cocotb==1.8.0 \
     && apt clean
 
 # Install verible
