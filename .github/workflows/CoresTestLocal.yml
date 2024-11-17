@@ -23,6 +23,9 @@ jobs: #Son los trabajos que realizará, en este caso de forma secuencial
     - name: Otorgar permisos de ejecución al script
       run: chmod +x run_tests_pipeline.sh
 
+    - name: Otorgar permisos de ejecución al script
+      run: chmod +x run_cocotb_tests.sh
+
     - name: Docker Login
       run: docker login --username utn-ba-sats --password ${{ secrets.GITHUB_TOKEN }} ghrc.io
 
