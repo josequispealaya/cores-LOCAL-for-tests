@@ -8,5 +8,6 @@ if [ ! -z $2 ]; then
     WAVES="--waves"
 fi
 
+
 export PYTHONPATH=tests/
 python3 run_tests.py $DUT $WAVES
