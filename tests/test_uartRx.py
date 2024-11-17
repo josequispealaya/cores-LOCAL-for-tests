@@ -10,6 +10,7 @@ import random
 from cocotb.runner import get_runner
 from cocotb.triggers import ClockCycles
 
+
 # do not change
 COCOTB_HDL_TIMEUNIT = "1ns"
 COCOTB_HDL_TIMEPRECISION = "1ps"
