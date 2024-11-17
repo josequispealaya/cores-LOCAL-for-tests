@@ -21,8 +21,6 @@ BAUD = 115200
 TEST_CYCLES = 5
 RANDOM_BYTES = 6
 
-# Reloj
-
 async def generate_rx_clk(reset_signal, clk_signal, rx_pulse_signal, rx_sync_signal, counter_value:int):
 
     main_counter = 0
