@@ -17,7 +17,9 @@ for TEST_FILE in $TEST_FILES; do
     # Ejecutar el test específico usando el script que ya se tiene
     # ./run_cocotb_tests.sh $TEST_NAME
     /usr/local/bin/run_cocotb_tests.sh $TEST_NAME
-
+    /usr/local/bin/run_cocotb_tests.sh test_uartRx
+    /usr/local/bin/run_cocotb_tests.sh test_uartTx
+    
     # Verificar si el test falló
     if [ $? -ne 0 ]; then
         echo "El test $TEST_NAME falló. Deteniendo la ejecución."
