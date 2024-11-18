@@ -7,7 +7,7 @@ RUN apt update \
         python3=3.9.2-3 \
         python3-pip=20.3.4-4+deb11u1 \
         iverilog=11.0-1 \
-        gtkwave=3.3.104-2 \
+        gtkwave=3.3.104 \
         wget \
     && pip3 install cocotb==1.8.0 \
     && apt clean
