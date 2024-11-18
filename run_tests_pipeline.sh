@@ -11,7 +11,7 @@ ls -l /usr/local/bin/
 for TEST_FILE in $TEST_FILES; do
     # Obtener el nombre del test
     #TEST_NAME=$(basename $TEST_FILE .py)
-    TEST_NAME=$(basename $TEST_FILE .py)
+    TEST_NAME=$(basename $TEST_FILE)
 
     echo "Ejecutando test: $TEST_NAME"
     
