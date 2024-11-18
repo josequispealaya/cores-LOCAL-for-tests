@@ -13,16 +13,9 @@ for TEST_FILE in $TEST_FILES; do
     TEST_NAME=$(basename $TEST_FILE .py)  # Le saca la extensión .py
     
     echo "Ejecutando test: $TEST_NAME"
-    
-    # Ejecutar el test específico usando el script que ya se tiene
-    # ./run_cocotb_tests.sh $TEST_NAME
-    #/usr/local/bin/run_cocotb_tests.sh $TEST_NAME
-
-    echo "Ejecutando test: $TEST_NAME"
     echo "Ejecutando run_cocotb_tests.sh con argumento: $TEST_NAME"
+ 
     /usr/local/bin/run_cocotb_tests.sh "$TEST_NAME"
-    #/usr/local/bin/run_cocotb_tests.sh test_uartRx
-    #/usr/local/bin/run_cocotb_tests.sh test_uartTx
     
     # Verificar si el test falló
     if [ $? -ne 0 ]; then
