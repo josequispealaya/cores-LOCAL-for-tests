@@ -4,6 +4,10 @@
 echo "Imprimiendo archivos .py en /usr/local/bin/tests/"
 TEST_FILES=$(ls /usr/local/bin/tests/*.py)
 
+echo "Verificando si el script run_cocotb_tests.sh existe..."
+ls -l /usr/local/bin/
+
+
 for TEST_FILE in $TEST_FILES; do
     # Obtener el nombre del test
     TEST_NAME=$(basename $TEST_FILE .py)
@@ -11,7 +15,8 @@ for TEST_FILE in $TEST_FILES; do
     echo "Ejecutando test: $TEST_NAME"
     
     # Ejecutar el test específico usando el script que ya se tiene
-    ./run_cocotb_tests.sh $TEST_NAME
+    # ./run_cocotb_tests.sh $TEST_NAME
+    /usr/local/bin/run_cocotb_tests.sh $TEST_NAME
 
     # Verificar si el test falló
     if [ $? -ne 0 ]; then
