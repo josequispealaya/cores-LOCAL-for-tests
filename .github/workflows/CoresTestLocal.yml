@@ -18,7 +18,7 @@ jobs: #Son los trabajos que realizará, en este caso de forma secuencial
       run: docker login --username utn-ba-sats --password ${{ secrets.GITHUB_TOKEN }} ghrc.io
 
     - name: Build Docker Image
-      run: docker build -t my-docker-image .
+      run: docker build -t my-docker-image -f ./Dockerfile .
 
     - name: Run Docker Tests
       run: docker run --rm my-docker-image ./run_tests_pipeline.sh
