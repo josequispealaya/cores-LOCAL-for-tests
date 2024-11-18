@@ -21,6 +21,6 @@ jobs: #Son los trabajos que realizará, en este caso de forma secuencial
       run: docker build -t my-docker-image -f ./Dockerfile .
 
     - name: Run Docker Tests
-      run: docker run --rm my-docker-image ./run_tests_pipeline.sh
+      run: docker run --rm my-docker-image /usr/local/bin/run_tests_pipeline.sh
 
  

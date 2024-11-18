@@ -12,6 +12,8 @@ COPY tests /usr/local/bin/tests
 COPY rtl /usr/local/bin/rtl
 COPY drv /usr/local/bin/drv
 
+# CHECK
+RUN ls -l /usr/local/bin/
 
 # Dar permisos de ejecución a los scripts
 RUN chmod +x /usr/local/bin/run_tests_pipeline.sh \
