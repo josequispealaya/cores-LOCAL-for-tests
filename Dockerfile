@@ -11,7 +11,7 @@ COPY tests /usr/local/bin/tests
 # Copiar las carpetas RTL, DRV, y sim_build
 COPY RTL /usr/local/bin/RTL
 COPY DRV /usr/local/bin/DRV
-COPY sim_build /usr/local/bin/sim_build
+#COPY sim_build /usr/local/bin/sim_build
 
 # Dar permisos de ejecución a los scripts
 RUN chmod +x /usr/local/bin/run_tests_pipeline.sh \
