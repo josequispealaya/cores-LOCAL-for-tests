@@ -10,9 +10,8 @@ ls -l /usr/local/bin/
 
 for TEST_FILE in $TEST_FILES; do
     # Obtener el nombre del test
-    #TEST_NAME=$(basename $TEST_FILE .py)
-    TEST_NAME=$(basename $TEST_FILE)
-
+    TEST_NAME=$(basename $TEST_FILE .py)  # Le saca la extensión .py
+    
     echo "Ejecutando test: $TEST_NAME"
     
     # Ejecutar el test específico usando el script que ya se tiene
