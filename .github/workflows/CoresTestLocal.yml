@@ -15,7 +15,7 @@ jobs: #Son los trabajos que realizará, en este caso de forma secuencial
     - uses: actions/checkout@v4 # Descarga la última versión del código
 
     - name: Docker Login
-      run: docker login --username utn-ba-sats --password ${{ secrets.GITHUB_TOKEN }} ghrc.io
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login --username utn-ba-sats --password-stdin ghrc.io
 
     - name: Build Docker Image
       run: docker build -t my-docker-image -f ./Dockerfile .
