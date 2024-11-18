@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Lista de archivos de tests en la carpeta 'tests/'
-TEST_FILES=$(ls tests/*.py)
+# Imprimir mensaje antes de listar los archivos
+echo "Imprimiendo archivos .py en /usr/local/bin/tests/"
+TEST_FILES=$(ls /usr/local/bin/tests/*.py)
 
 for TEST_FILE in $TEST_FILES; do
     # Obtener el nombre del test
