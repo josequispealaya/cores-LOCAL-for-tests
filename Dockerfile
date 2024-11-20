@@ -12,9 +12,6 @@ COPY tests /usr/local/bin/tests
 COPY rtl /usr/local/bin/rtl
 COPY drv /usr/local/bin/drv
 
-# CHECK
-RUN ls -l /usr/local/bin/
-
 # Dar permisos de ejecución a los scripts
 RUN chmod +x /usr/local/bin/run_tests_pipeline.sh \
     && chmod +x /usr/local/bin/run_cocotb_tests.sh \
@@ -31,7 +28,7 @@ RUN apt update \
         iverilog=11.0-1 \
         gtkwave \
         wget \
-    && pip3 install cocotb==1.8.0 \
+    && pip3 install cocotb==1.7.2 \
     && apt clean
 
 # Install verible
