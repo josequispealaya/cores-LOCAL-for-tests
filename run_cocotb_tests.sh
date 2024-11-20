@@ -10,5 +10,5 @@ fi
 
 
 export PYTHONPATH=tests/
-python3 /usr/local/bin/run_tests.py $DUT $WAVES
+python3 /code/run_tests.py $DUT $WAVES
 
