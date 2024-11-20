@@ -17,7 +17,7 @@ COCOTB_HDL_TIMEPRECISION = "1ps"
 IGNORED_SRC_FOLDERS = ["__pycache__", "sim_build", "interface"]
 
 CLK_PERIOD_NS = 50
-DUT = "uart_rx"
+DUT = "/code/rtl/uart_rx"
 BAUD = 115200
 TEST_CYCLES = 1
 RANDOM_BYTES = 6
