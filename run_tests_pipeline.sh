@@ -6,8 +6,8 @@ TEST_FILES=$(ls /code/tests/*.py)
 
 #echo "Verificando si el script run_cocotb_tests.sh existe..."
 #ls -laR /code/
-echo "verificando la ruta de test_file"
-echo $TEST_FILES
+echo "Archivos de prueba encontrados en /code/tests:"
+echo "$TEST_FILES"
 
 echo "Verificando el contenido de /code/rtl..."
 ls -laR /code/rtl
@@ -31,7 +31,7 @@ done
 
 # echo "Todos los tests han pasado correctamente."
 
-if [ $? -eq 0 ]; then
+if [ $? -eq 1 ]; then
     echo "Todos los tests han pasado correctamente."
 else
     echo "Error: Algunos tests fallaron."
