@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Imprimir mensaje antes de listar los archivos
-echo "Imprimiendo archivos .py en /usr/local/bin/tests/"
-TEST_FILES=$(ls /usr/local/bin/tests/*.py)
+echo "Imprimiendo archivos .py en /code/tests/"
+TEST_FILES=$(ls /code/tests/*.py)
 
 echo "Verificando si el script run_cocotb_tests.sh existe..."
-ls -l /usr/local/bin/
+ls -l /code/
 
 
 for TEST_FILE in $TEST_FILES; do
@@ -15,7 +15,7 @@ for TEST_FILE in $TEST_FILES; do
     echo "Ejecutando test: $TEST_NAME"
     echo "Ejecutando run_cocotb_tests.sh con argumento: $TEST_NAME"
  
-    /usr/local/bin/run_cocotb_tests.sh "$TEST_NAME"
+    /code/run_cocotb_tests.sh "$TEST_NAME"
     
     # Verificar si el test falló
     if [ $? -ne 0 ]; then

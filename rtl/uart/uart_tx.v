@@ -34,9 +34,8 @@ assign w_intrst = i_rst;
 
 always @(posedge i_clk or posedge w_intrst) begin
     
-    // if (w_intrst == 1'b1) begin
-    if (w_intrst == 0'b1) begin
-        
+    if (w_intrst == 1'b1) begin
+            
         r_actstate <= S_IDLE;
         r_bitcnt <= 'b0;
         r_txdata <= 'b0;
