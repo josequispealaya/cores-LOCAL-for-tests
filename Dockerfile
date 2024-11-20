@@ -9,7 +9,7 @@ COPY run_tests.py /usr/local/bin/run_tests.py
 COPY tests /usr/local/bin/tests
 
 # Copiar las carpetas RTL, DRV
-COPY rtl /usr/local/bin/rtl/uart
+COPY rtl /usr/local/bin/rtl
 COPY drv /usr/local/bin/drv
 
 # Dar permisos de ejecución a los scripts
