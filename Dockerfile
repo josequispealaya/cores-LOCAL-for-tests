@@ -9,7 +9,7 @@ COPY run_tests.py /usr/local/bin/run_tests.py
 COPY tests /usr/local/bin/tests
 
 # Copiar las carpetas RTL, DRV
-COPY rtl /usr/local/bin/rtl
+COPY rtl /usr/local/bin/rtl/uart
 COPY drv /usr/local/bin/drv
 
 # Dar permisos de ejecución a los scripts
@@ -24,7 +24,6 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt update \
     && apt install -y \
         python3=3.9.2-3 \
-        # python3=3.10.12 \
         python3-pip=20.3.4-4+deb11u1 \
         iverilog=11.0-1 \
         gtkwave \
