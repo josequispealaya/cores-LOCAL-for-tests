@@ -1,7 +1,9 @@
 #!/bin/bash
 
 if [ ! -z $1 ]; then
-    DUT="--dut $1"
+    # DUT="--dut $1"
+
+    DUT = "uart_rx.v"
 fi
 
 if [ ! -z $2 ]; then
