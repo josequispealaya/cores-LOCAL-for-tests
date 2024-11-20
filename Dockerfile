@@ -1,21 +1,27 @@
 FROM debian:bullseye-slim
 
 # Copiar los scripts y carpetas necesarias al contenedor
-COPY run_tests_pipeline.sh /usr/local/bin/run_tests_pipeline.sh
-COPY run_cocotb_tests.sh /usr/local/bin/run_cocotb_tests.sh
-COPY run_tests.py /usr/local/bin/run_tests.py
+#COPY run_tests_pipeline.sh /usr/local/bin/run_tests_pipeline.sh
+#COPY run_cocotb_tests.sh /usr/local/bin/run_cocotb_tests.sh
+#COPY run_tests.py /usr/local/bin/run_tests.py
+
+# Define el directorio de trabajo
+WORKDIR /code
+
+# Copiar todos los archivos del proyecto
+COPY . .
 
 # Copiar la carpeta 'tests'
-COPY tests /usr/local/bin/tests
+#COPY tests /usr/local/bin/tests
 
 # Copiar las carpetas RTL, DRV
-COPY rtl /usr/local/bin/rtl
-COPY drv /usr/local/bin/drv
+#COPY rtl /usr/local/bin/rtl
+#COPY drv /usr/local/bin/drv
 
 # Dar permisos de ejecución a los scripts
-RUN chmod +x /usr/local/bin/run_tests_pipeline.sh \
-    && chmod +x /usr/local/bin/run_cocotb_tests.sh \
-    && chmod +x /usr/local/bin/run_tests.py
+#RUN chmod +x /usr/local/bin/run_tests_pipeline.sh \
+#    && chmod +x /usr/local/bin/run_cocotb_tests.sh \
+#    && chmod +x /usr/local/bin/run_tests.py
 
 
 ENV DEBIAN_FRONTEND noninteractive
