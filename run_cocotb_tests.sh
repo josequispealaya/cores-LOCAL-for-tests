@@ -15,6 +15,6 @@ echo "WAVES: $WAVES"
 echo "PYTHONPATH: $PYTHONPATH"
 
 
-export PYTHONPATH=tests/
+export PYTHONPATH=/code/tests/
 python3 /code/run_tests.py $DUT $WAVES
 
