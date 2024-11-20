@@ -4,8 +4,11 @@
 echo "Imprimiendo archivos .py en /code/tests/"
 TEST_FILES=$(ls /code/tests/*.py)
 
-echo "Verificando si el script run_cocotb_tests.sh existe..."
-ls -l /code/
+#echo "Verificando si el script run_cocotb_tests.sh existe..."
+#ls -laR /code/
+
+echo "Verificando el contenido de /code/rtl..."
+ls -laR /code/rtl
 
 
 for TEST_FILE in $TEST_FILES; do
@@ -24,5 +27,13 @@ for TEST_FILE in $TEST_FILES; do
     fi
 done
 
-echo "Todos los tests han pasado correctamente."
+# echo "Todos los tests han pasado correctamente."
+
+if [ $? -eq 0 ]; then
+    echo "Todos los tests han pasado correctamente."
+else
+    echo "Error: Algunos tests fallaron."
+    exit 1
+fi
+
 exit 0
