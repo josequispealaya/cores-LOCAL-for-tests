@@ -19,9 +19,9 @@ COPY . .
 #COPY drv /usr/local/bin/drv
 
 # Dar permisos de ejecución a los scripts
-#RUN chmod +x /usr/local/bin/run_tests_pipeline.sh \
-#    && chmod +x /usr/local/bin/run_cocotb_tests.sh \
-#    && chmod +x /usr/local/bin/run_tests.py
+RUN chmod +x /code/run_tests_pipeline.sh \
+    && chmod +x /code/run_cocotb_tests.sh \
+    && chmod +x /code/run_tests.py
 
 
 ENV DEBIAN_FRONTEND noninteractive
