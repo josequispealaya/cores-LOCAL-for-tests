@@ -3,7 +3,7 @@
 if [ ! -z $1 ]; then
     # DUT="--dut $1"
 
-    DUT = "uart_rx.v"
+    DUT = "--dur uart_rx"
 fi
 
 if [ ! -z $2 ]; then
