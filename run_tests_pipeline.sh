@@ -31,7 +31,7 @@ done
 
 # echo "Todos los tests han pasado correctamente."
 
-if [ $? -eq 1 ]; then
+if [ $? -eq 0 ]; then
     echo "Todos los tests han pasado correctamente."
 else
     echo "Error: Algunos tests fallaron."
