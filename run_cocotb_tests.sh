@@ -9,6 +9,12 @@ if [ ! -z $2 ]; then
 fi
 
 
+# Mensajes de depuración
+echo "DUT: $DUT"
+echo "WAVES: $WAVES"
+echo "PYTHONPATH: $PYTHONPATH"
+
+
 export PYTHONPATH=tests/
 python3 /code/run_tests.py $DUT $WAVES
 
