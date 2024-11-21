@@ -164,7 +164,7 @@ def test_cocotb(dut, waves=False):
     for module, module_path, test_path in modules:
         #PRUEBAS
         print(f"EL MODULES ES: ({module})")
-        #print(f"EL MODULE_PATH ES: ({module_path})")
+        print(f"EL MODULE_PATH ES: ({module_path})")
         #print(f"EL TEST_PATH ES: ({test_path})")
 
         with TemporaryDirectory() as tmp_dir:
@@ -172,8 +172,11 @@ def test_cocotb(dut, waves=False):
             #PRUEBA
             #print(" ¿¿¿¿  PASÓ EL WITH   ???:")
 
-            module_dir = module_path.removesuffix(f'{module}.v')
-            
+            #SE CAMBIÓ 
+            #module_dir = module_path.removesuffix(f'{module}.v')
+            module_dir = os.path.dirname(module_path)
+            print(f"El directorio base del módulo es: {module_dir}")
+
             print(f"EL MODULE SIN SUFIJO .V ES: ({module_dir})")
 
             print(f"module_path: {module_path}")
@@ -183,13 +186,14 @@ def test_cocotb(dut, waves=False):
             
             # Usa el directorio temporal para construir un directorio único para el módulo
             build_dir = os.path.join(tmp_dir, module)
-    
             print(f"NUEVO build_dir: {build_dir}")
             
             runner.build(
                 verilog_sources = [module_path, config_waveform_dump(tmp_dir, module)],
                 hdl_toplevel = module,
-                build_dir = module_dir,
+                #SE MODIFICÓ
+                #build_dir = module_dir,
+                build_dir = os.path.join(tmp_dir, module)
                 build_args = ["-f", os.path.abspath(ICARUS_CFG_FILE)],
             )
 
