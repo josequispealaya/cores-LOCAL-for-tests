@@ -11,8 +11,8 @@ from tempfile import TemporaryDirectory
 HDL_LANGUAGE = 'verilog'
 VERILOG_SIM_DEFAULT = 'icarus'
 VERILOG_GPI_INTERFACES = ["vpi"]
-TESTS_DIRECTORY = '/code/tests'
-MODULES_DIRECTORY = '/code/rtl/uart'
+TESTS_DIRECTORY = 'tests'
+MODULES_DIRECTORY = 'rtl'
 ICARUS_CFG_FILE = 'icarus.cf'
 
 # Verilog directives to dump the test result in a vcd waveform file
@@ -22,6 +22,30 @@ WAVEFORM_FILE = 'waveform.vcd'
 
 sim = os.getenv('SIM', VERILOG_SIM_DEFAULT)
 logger = logging.getLogger(name='run_tests')
+
+
+import os
+
+print(f"TESTS_DIRECTORY: {os.path.abspath(TESTS_DIRECTORY)}")
+print(f"MODULES_DIRECTORY: {os.path.abspath(MODULES_DIRECTORY)}")
+print(f"Does TESTS_DIRECTORY exist? {os.path.exists(TESTS_DIRECTORY)}")
+print(f"Does MODULES_DIRECTORY exist? {os.path.exists(MODULES_DIRECTORY)}")
+
+
+if os.path.exists(TESTS_DIRECTORY):
+    print(f"Contents of TESTS_DIRECTORY ({TESTS_DIRECTORY}):")
+    for root, dirs, files in os.walk(TESTS_DIRECTORY):
+        print(f"Root: {root}")
+        print(f"Directories: {dirs}")
+        print(f"Files: {files}")
+
+if os.path.exists(MODULES_DIRECTORY):
+    print(f"Contents of MODULES_DIRECTORY ({MODULES_DIRECTORY}):")
+    for root, dirs, files in os.walk(MODULES_DIRECTORY):
+        print(f"Root: {root}")
+        print(f"Directories: {dirs}")
+        print(f"Files: {files}")
+
 
 
 def get_testable_modules():
