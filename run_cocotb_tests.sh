@@ -17,6 +17,10 @@ echo "EL DUT ANTES DE SER ENVIADO ES: $DUT"
 
 export PYTHONPATH=tests
 
+#AGREGAMOS ..
+rm -rf build
+mkdir -p build
+#
 
 python3 /code/run_tests.py $DUT $WAVES
 

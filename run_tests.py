@@ -185,6 +185,9 @@ def test_cocotb(dut, waves=False):
             print(f"EL MODULE SIN SUFIJO .V ES: ({module_dir})")
             
             runner.build(
+                #AGREGAMOS
+                build_dir=f"build/{args.dut}",
+                #
                 verilog_sources=[module_path, config_waveform_dump(tmp_dir, module)],
                 hdl_toplevel=module,
                 build_dir=module_dir,
