@@ -175,14 +175,14 @@ def test_cocotb(dut, waves=False):
             #SE CAMBIÓ 
             #module_dir = module_path.removesuffix(f'{module}.v')
             module_dir = os.path.dirname(module_path)
-            print(f"El directorio base del módulo es: {module_dir}")
+            ##print(f"El directorio base del módulo es: {module_dir}")
 
-            print(f"EL MODULE SIN SUFIJO .V ES: ({module_dir})")
+            ##print(f"EL MODULE SIN SUFIJO .V ES: ({module_dir})")
 
-            print(f"module_path: {module_path}")
-            print(f"tmp_dir: {tmp_dir}")
-            print(f"ICARUS_CFG_FILE: {os.path.abspath(ICARUS_CFG_FILE)}")
-            print(f"build_dir: {module_dir}")
+            ##print(f"module_path: {module_path}")
+            ##print(f"tmp_dir: {tmp_dir}")
+            ##print(f"ICARUS_CFG_FILE: {os.path.abspath(ICARUS_CFG_FILE)}")
+            ##print(f"build_dir: {module_dir}")
             
             # Usa el directorio temporal para construir un directorio único para el módulo
             build_dir = os.path.join(tmp_dir, module)
@@ -197,7 +197,7 @@ def test_cocotb(dut, waves=False):
                 build_args = ["-f", os.path.abspath(ICARUS_CFG_FILE)],
             )
 
-            print(" ¿¿¿¿  RUNNER.BUILD   ???:") 
+            print(" ¿¿¿¿ EJECUTÓ RUNNER.BUILD   ???:") 
 
             runner.test(
                 hdl_toplevel_lang=HDL_LANGUAGE,
