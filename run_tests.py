@@ -186,7 +186,9 @@ def test_cocotb(dut, waves=False):
             
             runner.build(
                 verilog_sources=[module_path, config_waveform_dump(tmp_dir, module)],
-                hdl_toplevel=module,
+                #MOODIFICAMOS
+                #hdl_toplevel=module,
+                toplevel=module,
                 build_dir=module_dir,
                 build_args=["-f", os.path.abspath(ICARUS_CFG_FILE)],
             )
@@ -196,8 +198,8 @@ def test_cocotb(dut, waves=False):
             runner.test(
                 hdl_toplevel_lang=HDL_LANGUAGE,
                 #MODIFICAMOS
-                #hdl_toplevel=module,
-                toplevel=module,
+                hdl_toplevel=module,
+                #toplevel=module,
                 test_module=f"test_{module}",
                 gpi_interfaces=VERILOG_GPI_INTERFACES,
                 build_dir=module_dir,
