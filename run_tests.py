@@ -11,8 +11,10 @@ from tempfile import TemporaryDirectory
 HDL_LANGUAGE = 'verilog'
 VERILOG_SIM_DEFAULT = 'icarus'
 VERILOG_GPI_INTERFACES = ["vpi"]
-TESTS_DIRECTORY = 'tests'
-MODULES_DIRECTORY = 'rtl'
+#TESTS_DIRECTORY = 'tests'
+#MODULES_DIRECTORY = 'rtl'
+TESTS_DIRECTORY = os.path.abspath('tests')
+MODULES_DIRECTORY = os.path.abspath('rtl')
 ICARUS_CFG_FILE = 'icarus.cf'
 
 # Verilog directives to dump the test result in a vcd waveform file
@@ -72,7 +74,7 @@ def get_testable_modules():
                     testable_modules.append((module, module_path, test_path))
 
    
-    print("MÓDULOS TESTEABLES:" + testable_modules)
+    #print("MÓDULOS TESTEABLES:" + testable_modules)
     return testable_modules
 
 
