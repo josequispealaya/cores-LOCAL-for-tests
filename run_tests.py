@@ -67,7 +67,13 @@ def get_testable_modules():
     print(f"ANTES DE ENTRAR AL FOR NUEVAMENTE IMPRIMI EL Contents of TESTS_DIRECTORY ({TESTS_DIRECTORY}):")
     
     for dirpath, dirnames, filenames in os.walk(TESTS_DIRECTORY):
+        print(f"EL DIRPATH ES: ({dirpath})")
+        print(f"EL DIRNAME ES: ({dirnames})")
+        print(f"EL FILENAME ES: ({filenames})")
         for file in filenames:
+            print(f"Segundo for")
+            print(f"EL FILE ES: ({filenames})")
+
             if file.startswith('test_') and file.endswith('.py'):
                 module = file.removeprefix('test_').removesuffix('.py')
                 module_path = modules.get(module)
