@@ -64,6 +64,8 @@ def get_testable_modules():
 
     testable_modules = []
 
+    print(f"ANTES DE ENTRAR AL FOR NUEVAMENTE IMPRIMI EL Contents of TESTS_DIRECTORY ({TESTS_DIRECTORY}):")
+    
     for dirpath, dirnames, filenames in os.walk(TESTS_DIRECTORY):
         for file in filenames:
             if file.startswith('test_') and file.endswith('.py'):
