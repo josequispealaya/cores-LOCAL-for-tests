@@ -72,10 +72,12 @@ def get_testable_modules():
         print(f"EL FILENAME ES: ({filenames})")
         for file in filenames:
             print(f"Segundo for")
-            print(f"EL FILE ES: ({filenames})")
+
+            print(f"EL FILE ES: ({file})")
 
             if file.startswith('test_') and file.endswith('.py'):
                 module = file.removeprefix('test_').removesuffix('.py')
+                print(f"EL MODULE ES: ({module})")
                 module_path = modules.get(module)
                 print(f"EL MODULE_PATH ES: {module_path}")
                 if module_path:
