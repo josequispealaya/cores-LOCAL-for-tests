@@ -137,6 +137,9 @@ def test_cocotb(dut, waves=False):
     print("MODULES IN Testable Modules:")
     for module, module_path, test_path in testeable_modules:
         print(f"Module: {module}, Module Path: {module_path}, Test Path: {test_path}")
+
+    
+    print(f"EL DUT PARA SER COMPARADO ES:  ({dut})")
     
     if dut:
         modules = [mod for mod in testeable_modules if mod[0] == dut]
