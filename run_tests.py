@@ -127,43 +127,35 @@ def config_waveform_dump(tmp_dir, module):
 
     return tmp_conf
 
-    # PRUEBA FORMATEAR EL DUT PARA SER COMPARADO
-    #print(f"FORMATEANDO EL DUT........")
-    # dut =  dut.removeprefix('test_').lower()
-
 def test_cocotb(dut, waves=False):
 
     runner = get_runner(sim)
 
     testeable_modules = get_testable_modules()
 
-    #PRUEABA
-    print("MODULES IN Testable Modules:")
-    for module, module_path, test_path in testeable_modules:
-        print(f"Module: {module}, Module Path: {module_path}, Test Path: {test_path}")
+    #PRUEBA
+    #print("MODULES IN Testable Modules:")
+    #for module, module_path, test_path in testeable_modules:
+    #    print(f"Module: {module}, Module Path: {module_path}, Test Path: {test_path}")
     # Aquí me imprime: uarttx
-
-
 
     print(f"EL DUT PARA SER COMPARADO ES:  ({dut})")
     # Aquí me imprime: uartrx    
     if dut:
         modules = [mod for mod in testeable_modules if mod[0] == dut]
 
-        
         #PRUEABA
-        print("MODULESs para ser comparado!!!!!:")
-        for module in modules:
-            print(f"Module: {module} ")
+        #print("MODULESs para ser comparado!!!!!:")
+        #for module in modules:
+        #    print(f"Module: {module} ")
 
-
-        print("Comparamos!!!!!")
+        #print("Comparamos!!!!!")
 
         if modules == []:
             logger.error(f'Missing DUT {dut}')
             return 1
     
-        print("PASAMOS EL IF?????:")
+        # print("PASAMOS EL IF?????:")
     
     else:
         modules = testeable_modules
@@ -171,18 +163,23 @@ def test_cocotb(dut, waves=False):
 
     for module, module_path, test_path in modules:
         #PRUEBAS
-        print(f"EL MODULES ES: ({module})")
-        print(f"EL MODULE_PATH ES: ({module_path})")
-        print(f"EL TEST_PATH ES: ({test_path})")
+        #print(f"EL MODULES ES: ({module})")
+        #print(f"EL MODULE_PATH ES: ({module_path})")
+        #print(f"EL TEST_PATH ES: ({test_path})")
 
         with TemporaryDirectory() as tmp_dir:
             
             #PRUEBA
-            print(" ¿¿¿¿  PASÓ EL WITH   ???:")
+            #print(" ¿¿¿¿  PASÓ EL WITH   ???:")
 
             module_dir = module_path.removesuffix(f'{module}.v')
             
             print(f"EL MODULE SIN SUFIJO .V ES: ({module_dir})")
+
+            print(f"module_path: {module_path}")
+            print(f"tmp_dir: {tmp_dir}")
+            print(f"ICARUS_CFG_FILE: {os.path.abspath(ICARUS_CFG_FILE)}")
+            print(f"build_dir: {module_dir}")
             
             runner.build(
                 verilog_sources = [module_path, config_waveform_dump(tmp_dir, module)],
