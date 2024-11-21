@@ -127,6 +127,9 @@ def config_waveform_dump(tmp_dir, module):
 
     return tmp_conf
 
+    # PRUEBA FORMATEAR EL DUT PARA SER COMPARADO
+    print(f"FORMATEANDO EL DUT........")
+    dut =  dut.removeprefix('test_').lower()
 
 def test_cocotb(dut, waves=False):
 
@@ -140,10 +143,7 @@ def test_cocotb(dut, waves=False):
         print(f"Module: {module}, Module Path: {module_path}, Test Path: {test_path}")
     # Aquí me imprime: uarttx
 
-    # PRUEBA FORMATEAR EL DUT PARA SER COMPARADO
 
-    print(f"FORMATEANDO EL DUT........")
-    dut =  dut.removeprefix('test_').lower()
 
     print(f"EL DUT PARA SER COMPARADO ES:  ({dut})")
     # Aquí me imprime: uartrx    
