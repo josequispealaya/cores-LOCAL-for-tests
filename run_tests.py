@@ -163,7 +163,7 @@ def test_cocotb(dut, waves=False):
 
     for module, module_path, test_path in modules:
         #PRUEBAS
-        #print(f"EL MODULES ES: ({module})")
+        print(f"EL MODULES ES: ({module})")
         #print(f"EL MODULE_PATH ES: ({module_path})")
         #print(f"EL TEST_PATH ES: ({test_path})")
 
