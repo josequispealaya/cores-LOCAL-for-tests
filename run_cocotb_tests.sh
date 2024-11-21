@@ -1,9 +1,7 @@
 #!/bin/bash
 
 if [ ! -z $1 ]; then
-    #DUT="--dut $1"
-
-    DUT="--dut /code/rtl/uart/uart_rx" 
+    DUT="--dut $1"
 fi
 
 if [ ! -z $2 ]; then
