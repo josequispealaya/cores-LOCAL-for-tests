@@ -17,9 +17,9 @@ COCOTB_HDL_TIMEPRECISION = "1ps"
 IGNORED_SRC_FOLDERS = ["__pycache__", "sim_build", "interface"]
 
 CLK_PERIOD_NS = 50
-DUT = "/code/rtl/uart_rx"
+DUT = "uart_rx"
 BAUD = 115200
-TEST_CYCLES = 1
+TEST_CYCLES = 5
 RANDOM_BYTES = 6
 
 async def generate_rx_clk(reset_signal, clk_signal, rx_pulse_signal, rx_sync_signal, counter_value:int):

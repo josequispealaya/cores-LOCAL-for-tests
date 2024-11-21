@@ -10,9 +10,10 @@ fi
 
 
 # Mensajes de depuración
-echo "DUT: $DUT"
-echo "WAVES: $WAVES"
-echo "PYTHONPATH: $PYTHONPATH"
+
+#echo "DUT: $DUT"
+#echo "WAVES: $WAVES"
+#echo "PYTHONPATH: $PYTHONPATH"
 
 
 export PYTHONPATH=tests

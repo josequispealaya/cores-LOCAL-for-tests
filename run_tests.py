@@ -61,7 +61,8 @@ def get_testable_modules():
         for file in filenames:
             if file.endswith('.v'):
                 # Diccionario (clave = valor)
-                modules[file.removesuffix('.v')] = os.path.join(dirpath, file)
+                #modules[file.removesuffix('.v')] = os.path.join(dirpath, file)
+                modules[file.removesuffix('.v').replace('_', '').lower()] = os.path.join(dirpath, file)
     # TESTEO
     # Imprimir el contenido del diccionario modules
     print("Contents of modules dictionary:")
@@ -84,7 +85,8 @@ def get_testable_modules():
             print(f"EL FILE ES: ({file})")
 
             if file.startswith('test_') and file.endswith('.py'):
-                module = file.removeprefix('test_').removesuffix('.py')
+                #module = file.removeprefix('test_').removesuffix('.py')
+                module = file.removeprefix('test_').removesuffix('.py').replace('_', '').lower()
                 
                 print(f"EL MODULE ES: ({module})")
 
