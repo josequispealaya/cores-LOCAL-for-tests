@@ -186,11 +186,13 @@ def test_cocotb(dut, waves=False):
             
             runner.build(
                 #AGREGAMOS
-                build_dir=f"build/{args.dut}",
+                #build_dir=f"build/{args.dut}",
                 #
                 verilog_sources=[module_path, config_waveform_dump(tmp_dir, module)],
                 hdl_toplevel=module,
-                build_dir=module_dir,
+                #MODIFICAMOS
+                #build_dir=module_dir,
+                build_dir=f"build/{module_dir}",
                 build_args=["-f", os.path.abspath(ICARUS_CFG_FILE)],
             )
 
