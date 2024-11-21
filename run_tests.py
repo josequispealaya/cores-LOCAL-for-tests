@@ -72,7 +72,7 @@ def get_testable_modules():
                     testable_modules.append((module, module_path, test_path))
 
    
-    print("MÓDULOS TESTEABLES:  $testable_modules")
+    print("MÓDULOS TESTEABLES:" + testable_modules)
     return testable_modules
 
 
