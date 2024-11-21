@@ -181,6 +181,11 @@ def test_cocotb(dut, waves=False):
             print(f"ICARUS_CFG_FILE: {os.path.abspath(ICARUS_CFG_FILE)}")
             print(f"build_dir: {module_dir}")
             
+            # Usa el directorio temporal para construir un directorio único para el módulo
+            build_dir = os.path.join(tmp_dir, module)
+    
+            print(f"NUEVO build_dir: {build_dir}")
+            
             runner.build(
                 verilog_sources = [module_path, config_waveform_dump(tmp_dir, module)],
                 hdl_toplevel = module,
