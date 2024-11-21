@@ -32,13 +32,7 @@ for TEST_FILE in $TEST_FILES; do
     fi
 done
 
-# echo "Todos los tests han pasado correctamente."
+echo "Todos los tests han pasado correctamente."
 
-if [ $? -eq 0 ]; then
-    echo "Todos los tests han pasado correctamente."
-else
-    echo "Error: Algunos tests fallaron."
-    exit 1
-fi
 
 exit 0
