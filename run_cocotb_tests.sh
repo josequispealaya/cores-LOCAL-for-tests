@@ -8,14 +8,15 @@ if [ ! -z $2 ]; then
     WAVES="--waves"
 fi
 
-
 # Mensajes de depuración
 
-#echo "DUT: $DUT"
+echo "EL DUT ANTES DE SER ENVIADO ES: $DUT"
 #echo "WAVES: $WAVES"
 #echo "PYTHONPATH: $PYTHONPATH"
 
 
 export PYTHONPATH=tests
+
+
 python3 /code/run_tests.py $DUT $WAVES
 
