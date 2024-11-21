@@ -195,7 +195,9 @@ def test_cocotb(dut, waves=False):
 
             runner.test(
                 hdl_toplevel_lang=HDL_LANGUAGE,
-                hdl_toplevel=module,
+                #MODIFICAMOS
+                #hdl_toplevel=module,
+                toplevel=module,
                 test_module=f"test_{module}",
                 gpi_interfaces=VERILOG_GPI_INTERFACES,
                 build_dir=module_dir,
