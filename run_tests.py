@@ -69,8 +69,8 @@ def get_testable_modules():
             if file.startswith('test_') and file.endswith('.py'):
                 module = file.removeprefix('test_').removesuffix('.py')
                 module_path = modules.get(module)
+                print(f"EL MODULE_PATH ES: {module_path}")
                 if module_path:
-                    print(f"EL MODULE_PATH ES: {module_path}")
                     test_path = os.path.join(dirpath, file)
                     testable_modules.append((module, module_path, test_path))
  
