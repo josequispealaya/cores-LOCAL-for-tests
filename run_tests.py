@@ -133,8 +133,22 @@ def test_cocotb(dut, waves=False):
 
     testeable_modules = get_testable_modules()
 
+    #PRUEABA
+    print("MODULES IN Testable Modules:")
+    for module, module_path, test_path in testeable_modules:
+        print(f"Module: {module}, Module Path: {module_path}, Test Path: {test_path}")
+    
     if dut:
         modules = [mod for mod in testeable_modules if mod[0] == dut]
+
+        
+        #PRUEABA
+        print("MODULESs para ser comparado!!!!!:")
+        for module, module_path, test_path in testeable_modules:
+            print(f"Module: {module} ")
+
+
+        print("Comparamos!!!!!")
 
         if modules == []:
             logger.error(f'Missing DUT {dut}')
