@@ -17,13 +17,16 @@ ls -laR /code/rtl
 
 
 for TEST_FILE in $TEST_FILES; do
-    # Obtener el nombre del test
-    TEST_NAME=$(basename $TEST_FILE .py)  # Le saca la extensión .py
+    # Obtener el nombre del test y sacarle la extensión .py
+    TEST_NAME = $(basename $TEST_FILE .py)  
     
     echo "Ejecutando test: $TEST_NAME"
     echo "Ejecutando run_cocotb_tests.sh con argumento: $TEST_NAME"
+
+    # Eliminar el prefijo "test_" y convertir a minúsculas
+    DUT_NAME = $(echo "$TEST_NAME" | sed 's/^test_//' | tr '[:upper:]' '[:lower:]')
  
-    /code/run_cocotb_tests.sh "$TEST_NAME"
+    /code/run_cocotb_tests.sh "$DUT_NAME"
     
     # Verificar si el test falló
     if [ $? -ne 0 ]; then

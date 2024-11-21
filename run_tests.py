@@ -128,8 +128,8 @@ def config_waveform_dump(tmp_dir, module):
     return tmp_conf
 
     # PRUEBA FORMATEAR EL DUT PARA SER COMPARADO
-    print(f"FORMATEANDO EL DUT........")
-    dut =  dut.removeprefix('test_').lower()
+    #print(f"FORMATEANDO EL DUT........")
+    # dut =  dut.removeprefix('test_').lower()
 
 def test_cocotb(dut, waves=False):
 
