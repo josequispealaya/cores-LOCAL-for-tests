@@ -162,10 +162,12 @@ def test_cocotb(dut, waves=False):
         if modules == []:
             logger.error(f'Missing DUT {dut}')
             return 1
+    
+        print("PASAMOS EL IF?????:")
+    
     else:
         modules = testeable_modules
 
-    print("PASAMOS EL IF?????:")
 
     for module, module_path, test_path in modules:
         #PRUEBAS
