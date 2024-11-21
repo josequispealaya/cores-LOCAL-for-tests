@@ -70,6 +70,7 @@ def get_testable_modules():
                 module = file.removeprefix('test_').removesuffix('.py')
                 module_path = modules.get(module)
                 if module_path:
+                    print(f"EL MODULE_PATH ES: {module_path}")
                     test_path = os.path.join(dirpath, file)
                     testable_modules.append((module, module_path, test_path))
  
@@ -80,7 +81,7 @@ def get_testable_modules():
         print(f"Module: {module}, Module Path: {module_path}, Test Path: {test_path}")
 
     print("IMPRIÓ ALGO???????")
-    
+
     return testable_modules
 
 def config_waveform_dump(tmp_dir, module):
