@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Hacer que el script falle si cualquier comando falla
-#set -e
+set -e
 
 # Imprimir mensaje antes de listar los archivos
 #echo "Imprimiendo archivos .py en /code/tests/"
