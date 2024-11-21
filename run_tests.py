@@ -176,9 +176,14 @@ def test_cocotb(dut, waves=False):
         print(f"EL TEST_PATH ES: ({test_path})")
 
         with TemporaryDirectory() as tmp_dir:
+            
+            #PRUEBA
+            print(" ¿¿¿¿  PASÓ EL WITH   ???:")
 
             module_dir = module_path.removesuffix(f'{module}.v')
-
+            
+            print(f"EL MODULE SIN SUFIJO .V ES: ({module_dir})")
+            
             runner.build(
                 verilog_sources=[module_path, config_waveform_dump(tmp_dir, module)],
                 hdl_toplevel=module,
@@ -197,7 +202,6 @@ def test_cocotb(dut, waves=False):
                 waves=True,
             )
         
-        print(" ¿¿¿¿  PASÓ EL WITH   ???:")
 
         if dut and waves:
             waveform = os.path.join(module_dir, WAVEFORM_FILE)
