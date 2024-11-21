@@ -196,6 +196,8 @@ def test_cocotb(dut, waves=False):
                 plusargs=['-f', os.path.abspath(ICARUS_CFG_FILE)],
                 waves=True,
             )
+        
+        print(" ¿¿¿¿  PASÓ EL WITH   ???:")
 
         if dut and waves:
             waveform = os.path.join(module_dir, WAVEFORM_FILE)
