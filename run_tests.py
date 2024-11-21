@@ -191,6 +191,8 @@ def test_cocotb(dut, waves=False):
                 build_args=["-f", os.path.abspath(ICARUS_CFG_FILE)],
             )
 
+            print(" ¿¿¿¿  RUNNER.BUILD   ???:") 
+
             runner.test(
                 hdl_toplevel_lang=HDL_LANGUAGE,
                 hdl_toplevel=module,
