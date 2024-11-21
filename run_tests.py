@@ -72,15 +72,16 @@ def get_testable_modules():
                 if module_path:
                     test_path = os.path.join(dirpath, file)
                     testable_modules.append((module, module_path, test_path))
+ 
 
-   
     # Imprimir el contenido de testable_modules
     print("Testable Modules:")
     for module, module_path, test_path in testable_modules:
         print(f"Module: {module}, Module Path: {module_path}, Test Path: {test_path}")
+
+    print("IMPRIÓ ALGO???????")
     
     return testable_modules
-
 
 def config_waveform_dump(tmp_dir, module):
     """ Generates a temporary config file to dump a waveform file
