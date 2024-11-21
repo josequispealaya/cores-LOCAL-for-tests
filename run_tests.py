@@ -144,7 +144,7 @@ def test_cocotb(dut, waves=False):
         
         #PRUEABA
         print("MODULESs para ser comparado!!!!!:")
-        for module, module_path, test_path in testeable_modules:
+        for module in modules:
             print(f"Module: {module} ")
 
 
