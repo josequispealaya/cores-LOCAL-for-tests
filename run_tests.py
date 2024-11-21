@@ -12,7 +12,7 @@ HDL_LANGUAGE = 'verilog'
 VERILOG_SIM_DEFAULT = 'icarus'
 VERILOG_GPI_INTERFACES = ["vpi"]
 TESTS_DIRECTORY = '/code/tests'
-MODULES_DIRECTORY = '/code/rtl'
+MODULES_DIRECTORY = '/code/rtl/uart'
 ICARUS_CFG_FILE = 'icarus.cf'
 
 # Verilog directives to dump the test result in a vcd waveform file
