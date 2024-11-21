@@ -26,12 +26,12 @@ sim = os.getenv('SIM', VERILOG_SIM_DEFAULT)
 logger = logging.getLogger(name='run_tests')
 
 
-import os
+#import os
 
-print(f"TESTS_DIRECTORY: {os.path.abspath(TESTS_DIRECTORY)}")
-print(f"MODULES_DIRECTORY: {os.path.abspath(MODULES_DIRECTORY)}")
-print(f"Does TESTS_DIRECTORY exist? {os.path.exists(TESTS_DIRECTORY)}")
-print(f"Does MODULES_DIRECTORY exist? {os.path.exists(MODULES_DIRECTORY)}")
+#print(f"TESTS_DIRECTORY: {os.path.abspath(TESTS_DIRECTORY)}")
+#print(f"MODULES_DIRECTORY: {os.path.abspath(MODULES_DIRECTORY)}")
+#print(f"Does TESTS_DIRECTORY exist? {os.path.exists(TESTS_DIRECTORY)}")
+#print(f"Does MODULES_DIRECTORY exist? {os.path.exists(MODULES_DIRECTORY)}")
 
 
 if os.path.exists(TESTS_DIRECTORY):
@@ -65,24 +65,24 @@ def get_testable_modules():
                 modules[file.removesuffix('.v').replace('_', '').lower()] = os.path.join(dirpath, file)
     # TESTEO
     # Imprimir el contenido del diccionario modules
-    print("Contents of modules dictionary:")
-    for module, path in modules.items():
-        print(f"Module: {module}, Path: {path}") 
+    #     print("Contents of modules dictionary:")
+    #        for module, path in modules.items():
+    #        print(f"Module: {module}, Path: {path}") 
 
-    print("FIN DE: Contents of modules dictionary:")
+    # print("FIN DE: Contents of modules dictionary:")
 
     testable_modules = []
 
-    print(f"ANTES DE ENTRAR AL FOR NUEVAMENTE IMPRIMI EL Contents of TESTS_DIRECTORY ({TESTS_DIRECTORY}):")
+    # print(f"ANTES DE ENTRAR AL FOR NUEVAMENTE IMPRIMI EL Contents of TESTS_DIRECTORY ({TESTS_DIRECTORY}):")
     
     for dirpath, dirnames, filenames in os.walk(TESTS_DIRECTORY):
-        print(f"EL DIRPATH ES: ({dirpath})")
-        print(f"EL DIRNAME ES: ({dirnames})")
-        print(f"EL FILENAME ES: ({filenames})")
+        #print(f"EL DIRPATH ES: ({dirpath})")
+        #print(f"EL DIRNAME ES: ({dirnames})")
+        #print(f"EL FILENAME ES: ({filenames})")
         for file in filenames:
-            print(f"Segundo for")
+         #   print(f"Segundo for")
 
-            print(f"EL FILE ES: ({file})")
+            #print(f"EL FILE ES: ({file})")
 
             if file.startswith('test_') and file.endswith('.py'):
                 #module = file.removeprefix('test_').removesuffix('.py')
@@ -104,7 +104,7 @@ def get_testable_modules():
     for module, module_path, test_path in testable_modules:
         print(f"Module: {module}, Module Path: {module_path}, Test Path: {test_path}")
 
-    print("IMPRIÓ ALGO???????")
+    # print("IMPRIÓ ALGO???????")
 
     return testable_modules
 
