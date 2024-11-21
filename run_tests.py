@@ -146,7 +146,7 @@ def test_cocotb(dut, waves=False):
     dut =  dut.removeprefix('test_').lower()
 
     print(f"EL DUT PARA SER COMPARADO ES:  ({dut})")
-    # Aquí me imprime: test_uartRx    
+    # Aquí me imprime: uartrx    
     if dut:
         modules = [mod for mod in testeable_modules if mod[0] == dut]
 
@@ -165,7 +165,13 @@ def test_cocotb(dut, waves=False):
     else:
         modules = testeable_modules
 
+    print("PASAMOS EL IF?????:")
+
     for module, module_path, test_path in modules:
+        #PRUEBAS
+        print(f"EL MODULES ES: ({module})")
+        print(f"EL MODULE_PATH ES: ({module_path})")
+        print(f"EL TEST_PATH ES: ({test_path})")
 
         with TemporaryDirectory() as tmp_dir:
 
@@ -195,7 +201,10 @@ def test_cocotb(dut, waves=False):
 
 
 def parse_args():
-    p = argparse.ArgumentParser(prog='tun_tests.py',
+    # SE CORRIGIÓ TUN POR RUN
+    #p = argparse.ArgumentParser(prog='tun_tests.py',
+    #                            description='Helper to run tests')
+    p = argparse.ArgumentParser(prog='run_tests.py',
                                 description='Helper to run tests')
 
     p.add_argument('--dut', help='Run test for one DUT')
