@@ -11,8 +11,8 @@ from tempfile import TemporaryDirectory
 HDL_LANGUAGE = 'verilog'
 VERILOG_SIM_DEFAULT = 'icarus'
 VERILOG_GPI_INTERFACES = ["vpi"]
-TESTS_DIRECTORY = 'tests'
-MODULES_DIRECTORY = 'rtl'
+TESTS_DIRECTORY = '/code/tests'
+MODULES_DIRECTORY = '/code/rtl'
 ICARUS_CFG_FILE = 'icarus.cf'
 
 # Verilog directives to dump the test result in a vcd waveform file
