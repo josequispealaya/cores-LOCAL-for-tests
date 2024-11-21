@@ -89,6 +89,7 @@ def get_testable_modules():
                 module = file.removeprefix('test_').removesuffix('.py').replace('_', '').lower()
                 
                 print(f"EL MODULE ES: ({module})")
+                # AQUÍ IMPRIME: uarttx     uartrx
 
                 module_path = modules.get(module)
 
@@ -100,7 +101,7 @@ def get_testable_modules():
  
 
     # Imprimir el contenido de testable_modules
-    print("Testable Modules:")
+    print("Testable Modules  ANTES DEL RETURN:")
     for module, module_path, test_path in testable_modules:
         print(f"Module: {module}, Module Path: {module_path}, Test Path: {test_path}")
 
@@ -137,10 +138,15 @@ def test_cocotb(dut, waves=False):
     print("MODULES IN Testable Modules:")
     for module, module_path, test_path in testeable_modules:
         print(f"Module: {module}, Module Path: {module_path}, Test Path: {test_path}")
+    # Aquí me imprime: uarttx
 
-    
+    # PRUEBA FORMATEAR EL DUT PARA SER COMPARADO
+
+    print(f"FORMATEANDO EL DUT........")
+    dut =  dut.removeprefix('test_').lower()
+
     print(f"EL DUT PARA SER COMPARADO ES:  ({dut})")
-    
+    # Aquí me imprime: test_uartRx    
     if dut:
         modules = [mod for mod in testeable_modules if mod[0] == dut]
 
