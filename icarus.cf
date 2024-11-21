@@ -1,6 +1,6 @@
 +timescale+1ns/1ps
-+incdir+/rtl/uart
-/rtl/uart/uart.v
-/rtl/uart/uart_rx.v
-/rtl/uart/uart_tx.v
-/rtl/uart/uart_clkgen.v
++incdir+/code/rtl/uart
+/code/rtl/uart/uart.v
+/code/rtl/uart/uart_rx.v
+/code/rtl/uart/uart_tx.v
+/code/rtl/uart/uart_clkgen.v
