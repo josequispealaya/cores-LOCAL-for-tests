@@ -195,8 +195,8 @@ def test_cocotb(dut, waves=False):
                 verilog_sources = [module_path, config_waveform_dump(tmp_dir, module)],
                 hdl_toplevel = module,
                 #SE MODIFICÓ
-                build_dir = module_dir,
-                #build_dir = os.path.join(tmp_dir, module),
+                #build_dir = module_dir,
+                build_dir = os.path.join(tmp_dir, module),
                 build_args = ["-f", os.path.abspath(ICARUS_CFG_FILE)],
             )
 
