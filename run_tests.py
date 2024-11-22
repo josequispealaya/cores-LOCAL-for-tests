@@ -76,9 +76,14 @@ def test_cocotb(dut, waves=False):
     if dut:
         modules = [mod for mod in testeable_modules if mod[0] == dut]
 
-        if modules == []:
+        if not modules:
             logger.error(f'Missing DUT {dut}')
-            return 1
+            exit (1)  # Detiene la ejecucicón con código de error 1
+        
+        ##  OLD ###
+        ## if modules == []:
+        #3    logger.error(f'Missing DUT {dut}')
+        #3    return 1
     
     else:
         modules = testeable_modules
@@ -123,7 +128,6 @@ def parse_args():
     dut.add_argument('-w', '--waves', action='store_true', help='Open waveforms for ')
 
     return p.parse_args()
-
 
 if __name__ == "__main__":
     args = parse_args()

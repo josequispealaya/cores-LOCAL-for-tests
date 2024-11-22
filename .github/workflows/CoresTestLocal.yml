@@ -16,5 +16,4 @@ jobs: #Son los trabajos que realizara, en este caso de forma secuencial
 
     - name: Test cores
       run: make test
-      env: 
-        DUT: uart_rx 
+     

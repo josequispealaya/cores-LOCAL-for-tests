@@ -1,5 +1,5 @@
 define run_in_container
-	docker run -it --rm \
+	docker run -i --rm \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
 		-v /var/run/dbus:/var/run/dbus \
 		--network host \
@@ -31,11 +31,25 @@ build-docker:  ## Build the docker used for development
 dockershell:  ## Run the development container
 	@$(call run_in_container, bash)
 
+## NUEVO
+test-all:  ## Run all tests for all  modules
+	@$(call run_in_container, ./run_cocotb_tests.sh)
 
-test:  ## Run all tests or the ones for specific module setting DUT variable
-	@echo "Running tests with DUT=${DUT}" 
+test:  ## Run tests for specific module setting DUT variable (DUT must be set)
+	@if [ -z "${DUT}" ]; then \
+		echo "Error: DUT variable not set. Use 'make test DUT=<module>'"; \
+		exit 1; \
+	fi
 	@$(call run_in_container, ./run_cocotb_tests.sh ${DUT})
 
+##
+
+
+##  OLD
+#test:  ## Run all tests or the ones for specific module setting DUT variable
+#	@echo "Running tests with DUT=${DUT}" 
+#	@$(call run_in_container, ./run_cocotb_tests.sh ${DUT})
+##
 
 waves:  ## Run gtkwave with last test waves from DUT variable
 	@[ "${DUT}" ] || ( echo "Usage:    DUT=<module> make waves"; exit 1 )
