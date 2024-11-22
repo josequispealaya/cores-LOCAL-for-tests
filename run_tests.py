@@ -34,19 +34,19 @@ logger = logging.getLogger(name='run_tests')
 #print(f"Does MODULES_DIRECTORY exist? {os.path.exists(MODULES_DIRECTORY)}")
 
 
-if os.path.exists(TESTS_DIRECTORY):
-    print(f"Contents of TESTS_DIRECTORY ({TESTS_DIRECTORY}):")
-    for root, dirs, files in os.walk(TESTS_DIRECTORY):
-        print(f"Root: {root}")
-        print(f"Directories: {dirs}")
-        print(f"Files: {files}")
+#if os.path.exists(TESTS_DIRECTORY):
+ #   print(f"Contents of TESTS_DIRECTORY ({TESTS_DIRECTORY}):")
+  #  for root, dirs, files in os.walk(TESTS_DIRECTORY):
+   #     print(f"Root: {root}")
+    #    print(f"Directories: {dirs}")
+     #   print(f"Files: {files}")
 
-if os.path.exists(MODULES_DIRECTORY):
-    print(f"Contents of MODULES_DIRECTORY ({MODULES_DIRECTORY}):")
-    for root, dirs, files in os.walk(MODULES_DIRECTORY):
-        print(f"Root: {root}")
-        print(f"Directories: {dirs}")
-        print(f"Files: {files}")
+#if os.path.exists(MODULES_DIRECTORY):
+ #   print(f"Contents of MODULES_DIRECTORY ({MODULES_DIRECTORY}):")
+  #  for root, dirs, files in os.walk(MODULES_DIRECTORY):
+   #     print(f"Root: {root}")
+    #    print(f"Directories: {dirs}")
+     #   print(f"Files: {files}")
 
 
 
@@ -185,15 +185,15 @@ def test_cocotb(dut, waves=False):
             ##print(f"build_dir: {module_dir}")
             
             # Usa el directorio temporal para construir un directorio único para el módulo
-            build_dir = os.path.join(tmp_dir, module)
-            print(f"NUEVO build_dir: {build_dir}")
+            #build_dir = os.path.join(tmp_dir, module)
+            #print(f"NUEVO build_dir: {build_dir}")
             
             runner.build(
                 verilog_sources = [module_path, config_waveform_dump(tmp_dir, module)],
                 hdl_toplevel = module,
                 #SE MODIFICÓ
-                #build_dir = module_dir,
-                build_dir = os.path.join(tmp_dir, module),
+                build_dir = module_dir,
+                #build_dir = os.path.join(tmp_dir, module),
                 build_args = ["-f", os.path.abspath(ICARUS_CFG_FILE)],
             )
 
