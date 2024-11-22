@@ -15,4 +15,6 @@ jobs: #Son los trabajos que realizara, en este caso de forma secuencial
       run: docker login --username utn-ba-sats --password ${{ secrets.GITHUB_TOKEN }} ghrc.io
 
     - name: Test cores
-      run: make test 
+      run: make test
+      env: 
+        DUT: uart_rx 
