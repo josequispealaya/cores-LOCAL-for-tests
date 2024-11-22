@@ -33,7 +33,7 @@ dockershell:  ## Run the development container
 
 
 test:  ## Run all tests or the ones for specific module setting DUT variable
-    @echo "Running tests with DUT=${DUT}"
+	@echo "Running tests with DUT=${DUT}" 
 	@$(call run_in_container, ./run_cocotb_tests.sh ${DUT})
 
 
