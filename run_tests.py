@@ -3,6 +3,9 @@ import logging
 import os
 import subprocess
 
+import warnings  # PARA IGNIRAR LAS ADVERTENCIAS DE Python runner
+warnings.filterwarnings("ignore", category=UserWarning, module="cocotb.runner")
+
 from cocotb.runner import get_runner
 from tempfile import TemporaryDirectory
 
