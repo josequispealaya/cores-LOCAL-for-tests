@@ -1,24 +1,18 @@
-name: CoresTestLocal #Nombre del workflow
+name: CoresTest #Nombre del workflow
 
-on: 
-  push:
-    branches:
-      - main 
-  
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+on: push #Accion con la que se activa, en este caso con un push en cualquier branch
 
-jobs: #Son los trabajos que realizará, en este caso de forma secuencial
+jobs: #Son los trabajos que realizara, en este caso de forma secuencial
   Test:
     runs-on: ubuntu-latest #OS que usará la vm de github para correr el workflow
     steps: #pasos del workflow
-    - uses: actions/checkout@v4 # Descarga la última versión del código
+    - uses: actions/checkout@v4 #Es una accion propia de actions, lo que hace es traer la ultima version de tu rama
+
+#    - name: Build Image #Nombre de este step
+#      run: make build-docker #Comando que va a ejecutar
 
     - name: Docker Login
-      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login --username utn-ba-sats --password-stdin ghrc.io
+      run: docker login --username utn-ba-sats --password ${{ secrets.GITHUB_TOKEN }} ghrc.io
 
-    - name: Build Docker Image
-      run: docker build -t my-docker-image -f ./Dockerfile .
-
-    - name: Run Docker Tests
-      run: docker run --rm my-docker-image /code/run_tests_pipeline.sh
+    - name: Test cores
+      run: make test 
