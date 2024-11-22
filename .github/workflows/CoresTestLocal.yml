@@ -24,7 +24,7 @@ jobs: #Son los trabajos que realizará, en este caso de forma secuencial
       run: docker run --rm my-docker-image /code/run_tests_pipeline.sh
     
     - name: Print cocotb version
-      run: |
-        python -c "import cocotb; print(f'cocotb version: {cocotb.__version__}')"
+      run: cocotb --version
+        
 
  
