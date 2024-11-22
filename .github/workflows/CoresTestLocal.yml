@@ -17,10 +17,10 @@ jobs: #Son los trabajos que realizara, en este caso de forma secuencial
     - name: Build Image #Nombre de este step
       run: make build-docker #Comando que va a ejecutar
 
-    - name: Run Dynamic Tests
-      run: python3 .github/scripts/run_dynamic_tests.py
+    #- name: Run Dynamic Tests
+     # run: python3 .github/scripts/run_dynamic_tests.py
     
     
-   # - name: Test cores
-   #   run: make test
+    - name: Test cores
+      run: make test
      
