@@ -28,7 +28,6 @@ WAVEFORM_FILE = 'waveform.vcd'
 sim = os.getenv('SIM', VERILOG_SIM_DEFAULT)
 logger = logging.getLogger(name='run_tests')
 
-
 #import os
 
 #print(f"TESTS_DIRECTORY: {os.path.abspath(TESTS_DIRECTORY)}")
@@ -190,9 +189,10 @@ def test_cocotb(dut, waves=False):
             # Usa el directorio temporal para construir un directorio único para el módulo
             #build_dir = os.path.join(tmp_dir, module)
             #print(f"NUEVO build_dir: {build_dir}")
+
+            print("LA version de cocotb es: ", cocotb.__version__)
             
-            #runner.build(
-            runner.run(
+            runner.build(
                 verilog_sources = [module_path, config_waveform_dump(tmp_dir, module)],
                 hdl_toplevel = module,
                 #SE MODIFICÓ
