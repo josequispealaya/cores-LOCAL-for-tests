@@ -14,9 +14,12 @@ ls -l /code/
 echo "Archivos de prueba encontrados en /code/tests:"
 echo "$TEST_FILES"
 
+#AQUI IMPRIME:   test_uartRx.py
+#                test_uartTx.py   
+
 echo "Verificando el contenido de /code/rtl..."
 #ls -laR /code/rtl
-ls -l /code/rtl
+## ls -l /code/rtl
 
 
 for TEST_FILE in $TEST_FILES; do
