@@ -5,18 +5,18 @@ set -e
 
 # Imprimir mensaje antes de listar los archivos
 ##echo "Imprimiendo archivos .py en /code/tests/"
-##TEST_FILES=$(ls /code/tests/*.py)
+TEST_FILES=$(ls /tests/*.py)
 
 echo "Verificando si el script run_cocotb_tests.sh existe..."
 #ls -laR /code/
-ls -l /code/
+##ls -l /code/
 
 echo "Archivos de prueba encontrados en /code/tests:"
 echo "$TEST_FILES"
 
 echo "Verificando el contenido de /code/rtl..."
 #ls -laR /code/rtl
-ls -l /code/rtl
+##ls -l /code/rtl
 
 
 for TEST_FILE in $TEST_FILES; do
