@@ -36,6 +36,7 @@ test-all:  ## Run all tests for all  modules
 	@$(call run_in_container, ./run_cocotb_tests.sh)
 
 test:  ## Run tests for specific module setting DUT variable (DUT must be set)
+	@echo "Running tests with DUT=${DUT}" 
 	@if [ -z "${DUT}" ]; then \
 		echo "Error: DUT variable not set. Use 'make test DUT=<module>'"; \
 		exit 1; \
