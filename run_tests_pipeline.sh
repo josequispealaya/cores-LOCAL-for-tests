@@ -32,7 +32,8 @@ for TEST_FILE in $TEST_FILES; do
     DUT_NAME=$(echo "$TEST_NAME" | sed 's/^test_//' | tr '[:upper:]' '[:lower:]')
  
     echo "Ejecutando run_cocotb_tests.sh con argumento: $DUT_NAME"
-    /code/run_cocotb_tests.sh "$DUT_NAME"
+    #/code/run_cocotb_tests.sh "$DUT_NAME"
+    run_cocotb_tests.sh "$DUT_NAME"
     
     # Verificar si el test falló
     if [ $? -ne 0 ]; then
