@@ -1,29 +1,5 @@
 FROM debian:bullseye-slim
 
-# Copiar los scripts y carpetas necesarias al contenedor
-#COPY run_tests_pipeline.sh /usr/local/bin/run_tests_pipeline.sh
-#COPY run_cocotb_tests.sh /usr/local/bin/run_cocotb_tests.sh
-#COPY run_tests.py /usr/local/bin/run_tests.py
-
-# Define el directorio de trabajo
-WORKDIR /code
-
-# Copiar todos los archivos del proyecto
-COPY . .
-
-# Copiar la carpeta 'tests'
-#COPY tests /usr/local/bin/tests
-
-# Copiar las carpetas RTL, DRV
-#COPY rtl /usr/local/bin/rtl
-#COPY drv /usr/local/bin/drv
-
-# Dar permisos de ejecución a los scripts
-RUN chmod +x /code/run_tests_pipeline.sh \
-    && chmod +x /code/run_cocotb_tests.sh \
-    && chmod +x /code/run_tests.py
-
-
 ENV DEBIAN_FRONTEND noninteractive
 
 # Instalar dependencias
@@ -32,9 +8,8 @@ RUN apt update \
         python3=3.9.2-3 \
         python3-pip=20.3.4-4+deb11u1 \
         iverilog=11.0-1 \
-        gtkwave \
+        gtkwave=3.3.104-2  \
         wget \
-    && pip3 install cocotb==1.7.2 \
     && apt clean
 
 # Install verible
