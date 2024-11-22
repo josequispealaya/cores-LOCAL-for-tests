@@ -88,12 +88,12 @@ def get_testable_modules():
                 #module = file.removeprefix('test_').removesuffix('.py')
                 module = file.removeprefix('test_').removesuffix('.py').replace('_', '').lower()
                 
-                print(f"EL MODULE ES: ({module})")
+                ## print(f"EL MODULE ES: ({module})")
                 # AQUÍ IMPRIME: uarttx     uartrx
 
                 module_path = modules.get(module)
 
-                print(f"EL MODULE_PATH ES: {module_path}")
+                ## print(f"EL MODULE_PATH ES: {module_path}")
 
                 if module_path:
                     test_path = os.path.join(dirpath, file)
@@ -101,9 +101,9 @@ def get_testable_modules():
  
 
     # Imprimir el contenido de testable_modules
-    print("Testable Modules  ANTES DEL RETURN:")
-    for module, module_path, test_path in testable_modules:
-        print(f"Module: {module}, Module Path: {module_path}, Test Path: {test_path}")
+   ## print("Testable Modules  ANTES DEL RETURN:")
+    ##for module, module_path, test_path in testable_modules:
+      ##  print(f"Module: {module}, Module Path: {module_path}, Test Path: {test_path}")
 
     # print("IMPRIÓ ALGO???????")
 
@@ -139,7 +139,7 @@ def test_cocotb(dut, waves=False):
     #    print(f"Module: {module}, Module Path: {module_path}, Test Path: {test_path}")
     # Aquí me imprime: uarttx
 
-    print(f"EL DUT PARA SER COMPARADO ES:  ({dut})")
+    ## print(f"EL DUT PARA SER COMPARADO ES:  ({dut})")
     # Aquí me imprime: uartrx    
     if dut:
         modules = [mod for mod in testeable_modules if mod[0] == dut]
@@ -163,8 +163,8 @@ def test_cocotb(dut, waves=False):
 
     for module, module_path, test_path in modules:
         #PRUEBAS
-        print(f"EL MODULES ES: ({module})")
-        print(f"EL MODULE_PATH ES: ({module_path})")
+       ## print(f"EL MODULES ES: ({module})")
+       ## print(f"EL MODULE_PATH ES: ({module_path})")
         #print(f"EL TEST_PATH ES: ({test_path})")
 
         with TemporaryDirectory() as tmp_dir:
@@ -197,7 +197,7 @@ def test_cocotb(dut, waves=False):
                 build_args = ["-f", os.path.abspath(ICARUS_CFG_FILE)],
             )
 
-            print(" ¿¿¿¿ EJECUTÓ RUNNER.BUILD   ???:") 
+            ##print(" ¿¿¿¿ EJECUTÓ RUNNER.BUILD   ???:") 
 
             runner.test(
                 hdl_toplevel_lang=HDL_LANGUAGE,
