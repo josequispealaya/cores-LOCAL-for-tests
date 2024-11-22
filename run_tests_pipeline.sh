@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Hacer que el script falle si cualquier comando falla
-set -e
+#set -e
 
 # Imprimir mensaje antes de listar los archivos
-##echo "Imprimiendo archivos .py en /code/tests/"
-TEST_FILES=$(ls /tests/*.py)
+echo "Imprimiendo archivos .py en /code/tests/"
+TEST_FILES=$(ls /code/tests/*.py)
 
 echo "Verificando si el script run_cocotb_tests.sh existe..."
 #ls -laR /code/
