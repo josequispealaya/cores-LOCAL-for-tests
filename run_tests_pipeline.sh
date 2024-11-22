@@ -8,13 +8,15 @@ set -e
 ##TEST_FILES=$(ls /code/tests/*.py)
 
 echo "Verificando si el script run_cocotb_tests.sh existe..."
-ls -laR /code/
+#ls -laR /code/
+ls -l /code/
 
 echo "Archivos de prueba encontrados en /code/tests:"
 echo "$TEST_FILES"
 
-##echo "Verificando el contenido de /code/rtl..."
-##ls -laR /code/rtl
+echo "Verificando el contenido de /code/rtl..."
+#ls -laR /code/rtl
+ls -l /code/rtl
 
 
 for TEST_FILE in $TEST_FILES; do
