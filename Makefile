@@ -32,8 +32,8 @@ dockershell:  ## Run the development container
 	@$(call run_in_container, bash)
 
 ## NUEVO
-test-all:  ## Run all tests for all  modules
-	@$(call run_in_container, ./run_cocotb_tests.sh)
+##test-all:  ## Run all tests for all  modules dynamically
+##	@$(call run_in_container, ./run_cocotb_tests.sh)
 
 ##test:  ## Run tests for specific module setting DUT variable (DUT must be set)
 ##	@echo "Running tests with DUT=${DUT}" 
@@ -46,11 +46,11 @@ test-all:  ## Run all tests for all  modules
 ##
 
 
-##  OLD
-#test:  ## Run all tests or the ones for specific module setting DUT variable
-#	@echo "Running tests with DUT=${DUT}" 
-#	@$(call run_in_container, ./run_cocotb_tests.sh ${DUT})
-##
+
+test:  ## Run all tests or the ones for specific module setting DUT variable
+	@echo "Running tests with DUT=${DUT}" 
+	@$(call run_in_container, ./run_cocotb_tests.sh ${DUT})
+
 
 waves:  ## Run gtkwave with last test waves from DUT variable
 	@[ "${DUT}" ] || ( echo "Usage:    DUT=<module> make waves"; exit 1 )
