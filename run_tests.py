@@ -190,14 +190,13 @@ def test_cocotb(dut, waves=False):
             #build_dir = os.path.join(tmp_dir, module)
             #print(f"NUEVO build_dir: {build_dir}")
 
-            print("LA version de cocotb es: ", cocotb.__version__)
-            
+                      
             runner.build(
                 verilog_sources = [module_path, config_waveform_dump(tmp_dir, module)],
                 hdl_toplevel = module,
                 #SE MODIFICÓ
-                #build_dir = module_dir,
-                build_dir = os.path.join(tmp_dir, module),
+                build_dir = module_dir,
+                #build_dir = os.path.join(tmp_dir, module),
                 build_args = ["-f", os.path.abspath(ICARUS_CFG_FILE)],
             )
 
