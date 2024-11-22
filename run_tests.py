@@ -191,9 +191,10 @@ def test_cocotb(dut, waves=False):
             #build_dir = os.path.join(tmp_dir, module)
             #print(f"NUEVO build_dir: {build_dir}")
             
-            runner.build(
+            #runner.build(
+            runner.run(
                 verilog_sources = [module_path, config_waveform_dump(tmp_dir, module)],
-                #hdl_toplevel = module,
+                hdl_toplevel = module,
                 #SE MODIFICÓ
                 #build_dir = module_dir,
                 build_dir = os.path.join(tmp_dir, module),
@@ -204,7 +205,7 @@ def test_cocotb(dut, waves=False):
 
             runner.test(
                 hdl_toplevel_lang=HDL_LANGUAGE,
-                #hdl_toplevel=module,
+                hdl_toplevel=module,
                 test_module=f"test_{module}",
                 gpi_interfaces=VERILOG_GPI_INTERFACES,
                 build_dir=module_dir,
