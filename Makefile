@@ -45,11 +45,15 @@ dockershell:  ## Run the development container
 
 ##
 
+- name: Test cores
+  run: |
+    docker pull ghcr.io/utn-ba-sats/hdlcores:latest
+    docker run --rm ghcr.io/utn-ba-sats/hdlcores:latest make test
 
 
-test:  ## Run all tests or the ones for specific module setting DUT variable
-	@echo "Running tests with DUT=${DUT}" 
-	@$(call run_in_container, ./run_cocotb_tests.sh ${DUT})
+##test:  ## Run all tests or the ones for specific module setting DUT variable
+##	@echo "Running tests with DUT=${DUT}" 
+##	@$(call run_in_container, ./run_cocotb_tests.sh ${DUT})
 
 
 waves:  ## Run gtkwave with last test waves from DUT variable
