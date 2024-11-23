@@ -20,7 +20,7 @@ jobs: #Son los trabajos que realizara, en este caso de forma secuencial
         docker run --rm \
           -v ${{ github.workspace }}:/code \
           -w /code \
-          -e DUT=/tests/test_uartRx \
+          -e DUT=/test_uartRx \
           ghcr.io/utn-ba-sats/hdlcores:latest make test
 
       ##    - name: Test cores
