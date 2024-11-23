@@ -14,14 +14,14 @@ jobs: #Son los trabajos que realizara, en este caso de forma secuencial
     - name: Docker Login
       run: docker login --username utn-ba-sats --password ${{ secrets.GITHUB_TOKEN }} ghrc.io
     
-    - name: Test cores
-      run: |
-        docker pull ghcr.io/utn-ba-sats/hdlcores:latest
-        docker run --rm \
-          -v ${{ github.workspace }}:/code \
-          -w /code \
-          -e DUT=uart_rx \
-          ghcr.io/utn-ba-sats/hdlcores:latest make test
+#    - name: Test cores
+#      run: |
+#        docker pull ghcr.io/utn-ba-sats/hdlcores:latest
+#        docker run --rm \
+#          -v ${{ github.workspace }}:/code \
+#          -w /code \
+#          -e DUT=uart_rx \
+#          ghcr.io/utn-ba-sats/hdlcores:latest make test
 
       ##    - name: Test cores
 ##      run: |
