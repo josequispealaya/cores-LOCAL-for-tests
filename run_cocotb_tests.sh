@@ -1,4 +1,5 @@
-#!/bin/bash
+!/bin/bash
+
 
 if [ ! -z $1 ]; then
     DUT="--dut $1"
