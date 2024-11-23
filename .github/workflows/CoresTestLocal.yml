@@ -14,13 +14,15 @@ jobs: #Son los trabajos que realizara, en este caso de forma secuencial
     - name: Docker Login
       run: docker login --username utn-ba-sats --password ${{ secrets.GITHUB_TOKEN }} ghrc.io
     
-    - name: Build Image #Nombre de este step
-      run: make build-docker #Comando que va a ejecutar
-
+    - name: Run tests
+      run: |
+        docker run --rm my-test-image make test
+    
+    
     #- name: Run Dynamic Tests
      # run: python3 .github/scripts/run_dynamic_tests.py
     
     
-    - name: Test cores
-      run: make test
+    #- name: Test cores
+    #  run: make test
      
