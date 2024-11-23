@@ -1,12 +1,32 @@
+ ##define run_in_container
+##	docker run -i --rm \
+##		-v /tmp/.X11-unix:/tmp/.X11-unix \
+##		-v /var/run/dbus:/var/run/dbus \
+##		--network host \
+##		-e DISPLAY=$(DISPLAY) \
+##		${EXTRA_ARGS} \
+##		-v $(PWD):/code -w /code \
+##		$(DOCKER_IMAGE_NAME) $(1)
+
 define run_in_container
-	docker run -i --rm \
-		-v /tmp/.X11-unix:/tmp/.X11-unix \
-		-v /var/run/dbus:/var/run/dbus \
-		--network host \
-		-e DISPLAY=$(DISPLAY) \
-		${EXTRA_ARGS} \
-		-v $(PWD):/code -w /code \
-		$(DOCKER_IMAGE_NAME) $(1)
+	@if [ ! -f /.dockerenv ]; then \
+		docker run -i --rm \
+			-v /tmp/.X11-unix:/tmp/.X11-unix \
+			-v /var/run/dbus:/var/run/dbus \
+			--network host \
+			-e DISPLAY=$(DISPLAY) \
+			${EXTRA_ARGS} \
+			-v $(PWD):/code -w /code \
+			$(DOCKER_IMAGE_NAME) $(1); \
+	else \
+		$(1); \
+	fi
+endef
+
+
+
+
+
 endef
 
 DOCKER_IMAGE_NAME = hdlcores:latest
