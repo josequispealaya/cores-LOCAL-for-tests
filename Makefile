@@ -31,19 +31,6 @@ build-docker:  ## Build the docker used for development
 dockershell:  ## Run the development container
 	@$(call run_in_container, bash)
 
-## NUEVO
-##test-all:  ## Run all tests for all  modules dynamically
-##	@$(call run_in_container, ./run_cocotb_tests.sh)
-
-##test:  ## Run tests for specific module setting DUT variable (DUT must be set)
-##	@echo "Running tests with DUT=${DUT}" 
-#	@if [ -z "${DUT}" ]; then \
-#		echo "Error: DUT variable not set. Use 'make test DUT=<module>'"; \
-#		exit 1; \
-#	fi
-#	@$(call run_in_container, ./run_cocotb_tests.sh ${DUT})
-
-##
 
 test:  ## Run all tests or the ones for specific module setting DUT variable
 	@echo "Running tests with DUT=${DUT}" 
