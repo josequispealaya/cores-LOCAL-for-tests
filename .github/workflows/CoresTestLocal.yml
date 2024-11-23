@@ -17,7 +17,15 @@ jobs: #Son los trabajos que realizara, en este caso de forma secuencial
     - name: Test cores
       run: |
         docker pull ghcr.io/utn-ba-sats/hdlcores:latest
-        docker run --rm ghcr.io/utn-ba-sats/hdlcores:latest make test
+        docker run --rm \
+          -v ${{ github.workspace }}:/code \
+          -w /code \
+          ghcr.io/utn-ba-sats/hdlcores:latest make test
+
+      ##    - name: Test cores
+##      run: |
+##        docker pull ghcr.io/utn-ba-sats/hdlcores:latest
+##        docker run --rm ghcr.io/utn-ba-sats/hdlcores:latest make test
     
     #  - name: Test cores
     #  run: make test
