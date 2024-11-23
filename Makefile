@@ -7,6 +7,7 @@
 ##		${EXTRA_ARGS} \
 ##		-v $(PWD):/code -w /code \
 ##		$(DOCKER_IMAGE_NAME) $(1)
+##endef
 
 define run_in_container
 	@if [ ! -f /.dockerenv ]; then \
@@ -27,7 +28,6 @@ endef
 
 
 
-endef
 
 DOCKER_IMAGE_NAME = hdlcores:latest
 
