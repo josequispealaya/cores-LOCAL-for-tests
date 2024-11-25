@@ -6,6 +6,8 @@ import subprocess
 from cocotb.runner import get_runner
 from tempfile import TemporaryDirectory
 
+# Configuración del logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Build and test configs
 HDL_LANGUAGE = 'verilog'
@@ -82,11 +84,14 @@ def test_cocotb(dut, waves=False):
         modules = testeable_modules
 
     for module, module_path, test_path in modules:
+        #Este mensaje indica qué módulo y qué prueba se están sometiendo
+        logger.info(f'Submitting module: {module}, test: {test_path}')
 
         with TemporaryDirectory() as tmp_dir:
             
             module_dir = os.path.dirname(module_path)
                       
+             # Construcción del módulo
             runner.build(
                 verilog_sources = [module_path, config_waveform_dump(tmp_dir, module)],
                 hdl_toplevel = module,
@@ -94,7 +99,8 @@ def test_cocotb(dut, waves=False):
                 build_args = ["-f", os.path.abspath(ICARUS_CFG_FILE)],
             )
 
-            runner.test(
+            # Ejecución de la prueba
+            result = runner.test(
                 hdl_toplevel_lang=HDL_LANGUAGE,
                 hdl_toplevel=module,
                 test_module=f"test_{module}",
@@ -104,6 +110,12 @@ def test_cocotb(dut, waves=False):
                 plusargs=['-f', os.path.abspath(ICARUS_CFG_FILE)],
                 waves=True,
             )
+
+             # Registro del resultado
+            if result == 0:
+                logger.info(f'Test {module} passed successfully.')
+            else:
+                logger.error(f'Test {module} failed.')
         
 
         if dut and waves:
