@@ -8,8 +8,8 @@ sim_build/
 
 **/hw_test/build/
 
-## gitignore para los .vvp y .vcd generados en las simulaciones
+## gitignore para los .xml, .vvp y .vcd generados en las simulaciones
 
-*.xml
+##*.xml
 *.vvp
 *.vcd
