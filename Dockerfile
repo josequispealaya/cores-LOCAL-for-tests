@@ -1,16 +1,11 @@
-FROM debian:bullseye-slim
+FROM ghcr.io/utn-ba-sats/hdlcores
 
-ENV DEBIAN_FRONTEND noninteractive
+# Establecer la variable de entorno para el frontend no interactivo
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Instalar dependencias
-RUN apt update \
-    && apt install -y \
-        python3=3.9.2-3 \
-        python3-pip=20.3.4-4+deb11u1 \
-        iverilog=11.0-1 \
-        gtkwave \
-        wget \
-    && apt clean
+# Instalar la versión específica de cocotb
+RUN pip uninstall -y cocotb || true \
+    && pip install cocotb==1.7.2
 
 # Install verible
 
@@ -26,5 +21,3 @@ RUN wget --progress=dot:giga "https://github.com/chipsalliance/verible/releases/
 
 # Install python requirements
 
-COPY requirements.txt .
-RUN pip install -r requirements.txt

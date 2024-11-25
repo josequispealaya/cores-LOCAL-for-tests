@@ -25,7 +25,6 @@ logger = logging.getLogger(name='run_tests')
 
 def get_testable_modules():
     """ Get all testable modules
-
         Return a list of tuples with (module, module_path, test_path)
     """
     modules = {}
@@ -51,7 +50,6 @@ def get_testable_modules():
 
 def config_waveform_dump(tmp_dir, module):
     """ Generates a temporary config file to dump a waveform file
-
         Returns a the tmp configuration file path
     """
 
@@ -76,14 +74,9 @@ def test_cocotb(dut, waves=False):
     if dut:
         modules = [mod for mod in testeable_modules if mod[0] == dut]
 
-        if not modules:
-            logger.error(f'Missing DUT {dut}')
-            exit (1)  # Detiene la ejecucicón con código de error 1
-        
-        ##  OLD ###
-        ## if modules == []:
-        #3    logger.error(f'Missing DUT {dut}')
-        #3    return 1
+        if modules == []:
+           logger.error(f'Missing DUT {dut}')
+           return 1
     
     else:
         modules = testeable_modules
