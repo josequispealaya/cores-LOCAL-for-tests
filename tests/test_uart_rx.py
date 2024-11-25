@@ -155,7 +155,7 @@ def test_simple_dff_runner():
     try:
         runner.test(
         toplevel=DUT,
-        py_module="test_uartRx"
+        py_module="test_uart_rx"
         )
     
     except Exception as e:

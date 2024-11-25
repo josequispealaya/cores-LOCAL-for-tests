@@ -136,7 +136,7 @@ def test_simple_dff_runner():
     try:
         runner.test(
             toplevel=DUT,
-            py_module="test_uartTx"
+            py_module="test_uart_tx"
             )
     except Exception as e:
         print(f"Test failed: {e}")
