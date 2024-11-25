@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import subprocess
+import logging
 
 from cocotb.runner import get_runner
 from tempfile import TemporaryDirectory
