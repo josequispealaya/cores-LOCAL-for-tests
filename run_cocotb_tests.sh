@@ -9,5 +9,5 @@ if [ ! -z $2 ]; then
 fi
 
 export PYTHONPATH=tests
-python3 /code/run_tests.py uart_rx
+python3 /code/run_tests.py --dut uartRx
 ##python3 /code/run_tests.py $DUT $WAVES
