@@ -165,22 +165,11 @@ def test_simple_dff_runner():
     if len(sys.argv) > 1 and sys.argv[1] == "--wave":
         print("Calling gtkwave to view waveform...\n")
        
-        wavefile = os.path.join(proj_path, "waveform.vcd")
+        wavefile = os.path.join(proj_path, "sim_build","waveform.vcd")
         if (os.path.exists(wavefile)):
             prog = ["gtkwave", str(wavefile)]
             subprocess.run(prog)
        
-    # Verificar que el programa se ejecute correctamente
-    if len(sys.argv) == 1 or sys.argv[1] != "--wave":
-        print("Simulation completed successfully.")
-    else:
-        print("Waveform visualization completed successfully.")
-    
-    # Verificar que las operaciones se ejecuten correctamente
-    if os.path.exists(os.path.join(proj_path, "waveform.vcd")):
-        print("Waveform file exists.")
-    else:
-        print("Error: Waveform file does not exist.")    
 
 if __name__ == "__main__":
     test_simple_dff_runner()
