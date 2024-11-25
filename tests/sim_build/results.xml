@@ -1,0 +1,6 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1732556348" />
+    <testcase name="simple_test" classname="test_uart_rx" file="/mnt/c/FRBA/PID/repo fork LOCAL para tests/cores-LOCAL-for-tests/tests/test_uart_rx.py" lineno="52" time="4.4086596965789795" sim_time_ns="400100.001" ratio_time="90753.20585765978" />
+  </testsuite>
+</testsuites>
